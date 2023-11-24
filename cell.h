@@ -1,5 +1,5 @@
 #pragma once
-#include "pawn.h"
+#include "figure.h"
 
 #include <Graph_lib/GUI.h>
 #include <Graph_lib/Graph.h>
@@ -19,32 +19,32 @@ struct Cell : Graph_lib::Button
 
     Cell(Point xy, Graph_lib::Callback cb, Type t);
 
-    void attach(Graph_lib::Window& win) override;
+    void attach (Graph_lib::Window& win) override;
 
-    void activate() {if(pw) pw -> color(FL_SELECTION_COLOR); }
-    void deactivate() { reset_color();}
+    void activate ()
+    {
+        if (pw)
+            pw->color(FL_SELECTION_COLOR);
+    }
+
+    void deactivate () { reset_color(); }
 
     bool is_black () const { return type == dark_green; }
 
     static constexpr int size = 80;
 
-    Point center() const { 
-        return Point{loc.x + width/2, loc.y + height/2}; 
-    }
+    Point center () const { return Point{loc.x + width / 2, loc.y + height / 2}; }
 
-    void attach_form(Form& ch);
+    void attach_figure (Figure& ch);
 
-    Form& detach_form();
+    Figure& detach_figure ();
 
-    bool has_form() const {
-        
-        return form != nullptr;
-    }
+    bool has_figure () const { return figure != nullptr; }
 
-    const Form& get_form() const; // обязательно нужна проверка не нулевой ли указатель checker
+    const Figure& get_figure () const;  // обязательно нужна проверка не нулевой ли указатель checker
+
   private:
     Type type;
     void reset_color ();
-    Form* form{nullptr};
+    Figure* figure{nullptr};
 };
-

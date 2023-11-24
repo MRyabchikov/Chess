@@ -1,6 +1,6 @@
 #include "cell.h"
 //
-#include "pawn.h"
+#include "figure.h"
 // #include "pawn.h"
 
 using namespace Graph_lib;
@@ -23,21 +23,21 @@ void Cell::attach(Graph_lib::Window& win)
     reset_color();
 }
 
-Form& Cell::detach_form()
+Figure& Cell::detach_figure()
 {
-    Form* ch = form;
-    form = nullptr;
+    Figure* ch = figure;
+    figure = nullptr;
     ch->detach();
     return *ch;
 }
 
-void Cell::attach_form(Form& ch)
+void Cell::attach_figure(Figure& ch)
 {
     ch.attach(*this);
-    form = &ch;
+    figure = &ch;
 }
 
-const Form& Cell::get_form() const
+const Figure& Cell::get_figure() const
 {  // обязательно нужна проверка не нулевой ли указатель checker
-    return *form;
+    return *figure;
 }

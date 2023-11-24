@@ -25,7 +25,7 @@ add_executable(
     cell.cpp 
     board.cpp 
     
-    pawn.cpp
+    figure.cpp
     ${LIB_DIR}/Graph_lib/Graph.cpp
     ${LIB_DIR}/Graph_lib/GUI.cpp
     ${LIB_DIR}/Graph_lib/Window.cpp
