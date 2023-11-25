@@ -7,6 +7,10 @@
 using Graph_lib::Address;
 using Graph_lib::Point;
 
+
+const Graph_lib::Point Chessboard_location{200,200};
+
+
 class MyWindow : public Simple_window
 {
   public:
@@ -52,4 +56,6 @@ struct Chessboard : MyWindow
     Graph_lib::Marks y_labels;
 
     Cell* selected{nullptr};
+
+    VisualSteps* all_possible_steps;
 };

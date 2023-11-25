@@ -77,8 +77,11 @@ void Chessboard::clicked(Cell& c)
     // std::cout << "1\n";
     if (!selected)
     {
+        all_possible_steps = nullptr;
         selected = &c;
         c.activate();  // подсвечивает
+        if(selected->has_figure())
+            all_possible_steps = c.get_figure().show_possible_steps(c.location(), *this);
         // std::cout << "2\n";
     }
     else
@@ -86,13 +89,30 @@ void Chessboard::clicked(Cell& c)
         // std::cout << "3\n";
         if (selected->has_figure())
         {
+            if(selected->get_figure().correct_step(*selected, c))
+            {
+            //if()
             // move_figure
             Cell& c1 = *selected;
-            c.attach_figure(c1.detach_figure());
+            if(c.has_figure())
+            {
+
+                detach(c.detach_figure());
+                c.attach_figure(c1.detach_figure());
+            }
+            else
+                c.attach_figure(c1.detach_figure());
             // std::cout << "4\n";
+            }
         }
 
         selected->deactivate();
+        if(all_possible_steps != nullptr)
+        {
+            delete all_possible_steps;
+            all_possible_steps = nullptr;
+        }
+        /*
         if (selected == &c)
         {
             selected = nullptr;
@@ -102,6 +122,8 @@ void Chessboard::clicked(Cell& c)
             selected = &c;
             c.activate();
         }
+        */
+       selected = nullptr;
     }
     Fl::redraw();
 }

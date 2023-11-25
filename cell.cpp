@@ -1,7 +1,10 @@
 #include "cell.h"
 //
 #include "figure.h"
+#include <iostream>
 // #include "pawn.h"
+
+//extern const Graph_lib::Point Chessboard_location;
 
 using namespace Graph_lib;
 
@@ -12,9 +15,9 @@ void Cell::reset_color()
     if (!pw)
         error("Cell is not attached to a window");
     if (is_black())
-        pw->color(Color::black);
+        pw->color(/*Color::chess_green*/Color::black);
     else
-        pw->color(Color::white);
+        pw->color(/*Color::chess_white*/Color::white);
 }
 
 void Cell::attach(Graph_lib::Window& win)
@@ -37,7 +40,19 @@ void Cell::attach_figure(Figure& ch)
     figure = &ch;
 }
 
-const Figure& Cell::get_figure() const
-{  // обязательно нужна проверка не нулевой ли указатель checker
+/*const*/ Figure& Cell::get_figure() const                         //removed const and i don't know
+{  // обязательно нужна проверка не нулевой ли указатель checker   //how it will turn out
     return *figure;
+}
+
+Coordinate Cell::location()
+{
+
+    int N = 8;                          // Couldn't find a way to properly use
+                                        //the static constant from "board.h"
+
+    int x = (loc.x - DFTBOF)/size + 1;
+    int y = N - (loc.y - DFTBOF)/size;
+
+    return Coordinate{x,y};
 }

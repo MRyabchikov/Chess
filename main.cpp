@@ -2,15 +2,21 @@
 #include "cell.h"
 // #include "checker.h"
 #include "figure.h"
+#include <iostream>
+
+
+extern const Graph_lib::Point Chessboard_location;
+
 
 int main ()
 {
-    Chessboard chess({200, 200});
+    Chessboard chess(Chessboard_location);
 
     // белые пешки
-    Pawn wp0(chess, Figure::Type::white), wp1(chess, Figure::Type::white), wp2(chess, Figure::Type::white),
-        wp3(chess, Figure::Type::white), wp4(chess, Figure::Type::white), wp5(chess, Figure::Type::white),
-        wp6(chess, Figure::Type::white), wp7(chess, Figure::Type::white);
+    Pawn wp0(chess, Figure::Type::white), wp1(chess, Figure::Type::white),
+         wp2(chess, Figure::Type::white), wp3(chess, Figure::Type::white),
+         wp4(chess, Figure::Type::white), wp5(chess, Figure::Type::white),
+         wp6(chess, Figure::Type::white), wp7(chess, Figure::Type::white);
 
     chess.at('a', 2).attach_figure(wp0);
     chess.at('b', 2).attach_figure(wp1);
@@ -22,9 +28,10 @@ int main ()
     chess.at('h', 2).attach_figure(wp7);
 
     // черные пешки
-    Pawn bp0(chess, Figure::Type::black), bp1(chess, Figure::Type::black), bp2(chess, Figure::Type::black),
-        bp3(chess, Figure::Type::black), bp4(chess, Figure::Type::black), bp5(chess, Figure::Type::black),
-        bp6(chess, Figure::Type::black), bp7(chess, Figure::Type::black);
+    Pawn bp0(chess, Figure::Type::black), bp1(chess, Figure::Type::black),
+         bp2(chess, Figure::Type::black), bp3(chess, Figure::Type::black),
+         bp4(chess, Figure::Type::black), bp5(chess, Figure::Type::black),
+         bp6(chess, Figure::Type::black), bp7(chess, Figure::Type::black);
 
     chess.at('a', 7).attach_figure(bp0);
     chess.at('b', 7).attach_figure(bp1);
@@ -34,6 +41,9 @@ int main ()
     chess.at('f', 7).attach_figure(bp5);
     chess.at('g', 7).attach_figure(bp6);
     chess.at('h', 7).attach_figure(bp7);
+
+
+    /*
 
     // белые кони
     Knight wn0(chess, Figure::Type::white), wn1(chess, Figure::Type::white);
@@ -91,7 +101,29 @@ int main ()
 
     chess.at('d', 8).attach_figure(bq);
 
+    */
+
+    /*
+    std::cout << chess.at('a',1).location().x << ' ' << chess.at('a',1).location().y << '\n';
+    std::cout << chess.at('b',1).location().x << ' ' << chess.at('b',1).location().y << '\n';
+    std::cout << chess.at('a',8).location().x << ' ' << chess.at('a',8).location().y << '\n';
+    std::cout << chess.at('h',8).location().x << ' ' << chess.at('h',8).location().y << '\n';
+    std::cout << chess.at('a',7).location().x << ' ' << chess.at('a',7).location().y << '\n';
+    std::cout << chess.at('a',5).location().x << ' ' << chess.at('a',5).location().y << '\n';
+    */
+
+    //Frame frm{chess.at('a',8).center()};
+    //chess.attach(frm);
+
+    //Graph_lib::Rectangle rec{{200,200}, 80, 80};
+    //rec.set_fill_color(Graph_lib::Color::green);
+    //chess.attach(rec);
+
+    std::cout << chess.at('a',8).center().x << ' ' << chess.at('a',8).center().y << '\n';
+
     chess.wait_for_button();
+
+    return 0;
 }
 
 // C:/Projects/build/Chessboard2/chessboard.exe
