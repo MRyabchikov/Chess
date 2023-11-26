@@ -69,7 +69,7 @@ Chessboard::Chessboard(Point xy) : MyWindow{xy, width, height, "Chessboard"}, x_
 }
 
 void Chessboard::clicked(Cell& c)
-{  // для шашек. Для всего остального удалить
+{   // для шашек. Для всего остального удалить
     // if (!c.is_black()) return; для контроля, кто должен ходить
     //  в c также лежит информация о том, стоит ли фигура на это клетке. (предположительно)
     //  если стоит, то has_checker() == true;
@@ -81,6 +81,7 @@ void Chessboard::clicked(Cell& c)
         selected = &c;
         c.activate();  // подсвечивает
         if(selected->has_figure())
+            // Create visual representation of moves for current figure
             all_possible_steps = c.get_figure().show_possible_steps(c.location(), *this);
         // std::cout << "2\n";
     }
@@ -89,14 +90,14 @@ void Chessboard::clicked(Cell& c)
         // std::cout << "3\n";
         if (selected->has_figure())
         {
-            if(selected->get_figure().correct_step(*selected, c))
+            if(selected->get_figure().correct_step(*selected, c, *this))
             {
             //if()
             // move_figure
             Cell& c1 = *selected;
             if(c.has_figure())
             {
-
+                //taking the figure from the opponent
                 detach(c.detach_figure());
                 c.attach_figure(c1.detach_figure());
             }
@@ -107,22 +108,13 @@ void Chessboard::clicked(Cell& c)
         }
 
         selected->deactivate();
+
+        // Clear the screen from visual representation of possible moves for the current figure
         if(all_possible_steps != nullptr)
         {
             delete all_possible_steps;
             all_possible_steps = nullptr;
         }
-        /*
-        if (selected == &c)
-        {
-            selected = nullptr;
-        }
-        else
-        {
-            selected = &c;
-            c.activate();
-        }
-        */
        selected = nullptr;
     }
     Fl::redraw();

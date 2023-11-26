@@ -4,8 +4,6 @@
 #include <iostream>
 // #include "pawn.h"
 
-//extern const Graph_lib::Point Chessboard_location;
-
 using namespace Graph_lib;
 
 Cell::Cell(Point xy, Callback cb, Type t) : Button{xy, size, size, "", cb}, type{t} {}
@@ -40,18 +38,19 @@ void Cell::attach_figure(Figure& ch)
     figure = &ch;
 }
 
-/*const*/ Figure& Cell::get_figure() const                         //removed const and i don't know
-{  // обязательно нужна проверка не нулевой ли указатель checker   //how it will turn out
+//removed const and i don't know how it will turn out  
+/*const*/ Figure& Cell::get_figure() const // обязательно нужна проверка не нулевой ли указатель checker                     
+{ 
     return *figure;
 }
 
 Coordinate Cell::location()
 {
 
-    int N = 8;                          // Couldn't find a way to properly use
-                                        //the static constant from "board.h"
+    int N = 8;       //Couldn't find a way to properly use
+                     //the static constant from "board.h"
 
-    int x = (loc.x - DFTBOF)/size + 1;
+    char x = char((loc.x - DFTBOF)/size + a_ascii);
     int y = N - (loc.y - DFTBOF)/size;
 
     return Coordinate{x,y};

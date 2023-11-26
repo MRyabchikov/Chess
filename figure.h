@@ -3,40 +3,17 @@
 // "cell.h"
 #include <Graph_lib/Graph.h>
 #include <Graph_lib/Simple_window.h>
-#include <vector>
-#include <memory>
+#include "steps_representation.h"
 
-using Graph_lib::Rectangle;
-using Graph_lib::Point;
 
-constexpr int a_ascii = 97;
-constexpr int c_size = 80; //couldn't find a way to get this constant from "cell.h"
+constexpr int a_ascii = 97; //ascii code of letter 'a'
+
 
 struct Cell;
 struct Chessboard;
 struct Coordinate;
+struct VisualSteps;
 
-struct Frame : Rectangle
-{
-    Frame(Point center);
-    ~Frame();
-    
-    void draw_lines() const override;
-
-    private:
-        static constexpr int rc_width = 10;
-        static constexpr int rc_length = 30;
-
-        std::vector<Rectangle*> horisontal_rectangles; //Please check for 
-        std::vector<Rectangle*> vertical_rectangles;   //possible memory leaks
-};
-
-struct VisualSteps
-{
-    ~VisualSteps();
-    std::vector<Frame*> possible_takes;
-    std::vector<Graph_lib::Circle*> possible_steps;
-};
 
 struct Figure : Graph_lib::Image
 {  // Graph_lib::Image
@@ -44,7 +21,7 @@ struct Figure : Graph_lib::Image
     enum Type
     {
         black,
-        white,
+        white
     };
 
     Figure(Graph_lib::Window& win, Type color, std::string path_to_image) : Graph_lib::Image(Graph_lib::Point(0, 0), path_to_image)
@@ -53,16 +30,19 @@ struct Figure : Graph_lib::Image
         win.attach(*this);
     }
 
-    virtual bool correct_step(Cell& c1, Cell& c2) = 0;
-    virtual VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) = 0;
+    //Checks if clicked cell satisfies the conditions of a correct move
+    virtual bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) = 0;
 
+    //Creates an object "VisualSteps" that is required to show all possible moves of currently clicked figure
+    virtual VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) = 0;
+                                                                                
     void draw_lines () const override { Graph_lib::Image::draw_lines(); }
 
     void attach (const Cell& c);
 
-    bool is_white () { return color == white; }
+    bool is_white () const { return color == white; }
 
-    bool is_black () { return color == black; }
+    bool is_black () const { return color == black; }
 
     void detach () { cell = nullptr; }
 
@@ -77,7 +57,7 @@ struct Pawn : Figure
     Pawn(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wP.png" : "bP.png"),
                                                first_step{true} {}
 
-    bool correct_step(Cell& c1, Cell& c2) override;
+    bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
 
     private:
