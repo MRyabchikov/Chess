@@ -103,24 +103,6 @@ int main ()
 
     */
 
-    /*
-    std::cout << chess.at('a',1).location().x << ' ' << chess.at('a',1).location().y << '\n';
-    std::cout << chess.at('b',1).location().x << ' ' << chess.at('b',1).location().y << '\n';
-    std::cout << chess.at('a',8).location().x << ' ' << chess.at('a',8).location().y << '\n';
-    std::cout << chess.at('h',8).location().x << ' ' << chess.at('h',8).location().y << '\n';
-    std::cout << chess.at('a',7).location().x << ' ' << chess.at('a',7).location().y << '\n';
-    std::cout << chess.at('a',5).location().x << ' ' << chess.at('a',5).location().y << '\n';
-    */
-
-    //Frame frm{chess.at('a',8).center()};
-    //chess.attach(frm);
-
-    //Graph_lib::Rectangle rec{{200,200}, 80, 80};
-    //rec.set_fill_color(Graph_lib::Color::green);
-    //chess.attach(rec);
-
-    std::cout << chess.at('a',8).center().x << ' ' << chess.at('a',8).center().y << '\n';
-
     chess.wait_for_button();
 
     return 0;

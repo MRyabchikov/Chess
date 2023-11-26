@@ -73,7 +73,7 @@ bool Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
 VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) //Shows all possible
                                                                                //moves on the board
 {
-    VisualSteps* steps_representation = new VisualSteps;
+    VisualSteps* steps_representation = new VisualSteps{chess};
 
     int decider;
     if(is_white())    
@@ -116,7 +116,7 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) /
 
                 first_step = first_step_reserved; //Костыль
 
-                Frame* tempf = new Frame{chess.at(char(int(position.x) + i),position.y + decider).center()};
+                Frame* tempf = new Frame{chess.at(char(int(position.x) + i),position.y + decider).center(), chess};
                 steps_representation->possible_takes.push_back(tempf);
                 chess.attach(*steps_representation->possible_takes.back());
                 //delete tempf;

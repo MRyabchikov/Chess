@@ -1,7 +1,7 @@
 #include "steps_representation.h"
 
 
-Frame::Frame(Point center) : 
+Frame::Frame(Point center, Simple_window& chess_) : 
     Rectangle({center.x - c_size/2, center.y - c_size/2}, c_size, c_size)
 {
     Rectangle* h_r1 = new Rectangle{{center.x - c_size/2, center.y - c_size/2}, rc_width, rc_length};
@@ -46,16 +46,23 @@ Frame::Frame(Point center) :
     vertical_rectangles.push_back(v_r2);
     vertical_rectangles.push_back(v_r3);
     vertical_rectangles.push_back(v_r4);
+
+    chess = &chess_;
 }
 
+//I am very unsure of this destructor
 Frame::~Frame()
 {
     for(int i = (int)horisontal_rectangles.size() - 1; i >= 0; i--)
     {
+        //Graph_lib::Rectangle::~Rectangle();
+        chess->detach(*horisontal_rectangles[i]);
         delete horisontal_rectangles[i];
         horisontal_rectangles.erase(horisontal_rectangles.begin()+i,horisontal_rectangles.begin()+i+1);
+        chess->detach(*vertical_rectangles[i]);
         delete vertical_rectangles[i];
         vertical_rectangles.erase(vertical_rectangles.begin()+i,vertical_rectangles.begin()+i+1);
+        chess->detach(*this);
     }
 }
 
@@ -72,15 +79,18 @@ void Frame::draw_lines() const
     vertical_rectangles[3]->draw_lines();
 }
 
+//I am very unsure of this destructor
 VisualSteps::~VisualSteps()
 {
     for(int i = int(possible_steps.size() - 1); i >= 0; i--)
     {
+        chess->detach(*possible_steps[i]);
         delete possible_steps[i];
         possible_steps.erase(possible_steps.begin()+i,possible_steps.begin()+i+1);
     }
     for(int i = int(possible_takes.size()-1); i >= 0; i--)
     {
+        chess->detach(*possible_takes[i]);
         delete possible_takes[i];
         possible_takes.erase(possible_takes.begin()+i,possible_takes.begin()+i+1);
     }

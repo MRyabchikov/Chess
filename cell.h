@@ -5,6 +5,9 @@
 #include <Graph_lib/GUI.h>
 #include <Graph_lib/Graph.h>
 
+constexpr int chess_green = 116;
+constexpr int chess_white = 215;
+
 constexpr int DFTBOF = 30; //distance_from_the_beginning_of_coordinates
 
 struct Checker;

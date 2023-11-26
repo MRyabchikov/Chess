@@ -1,6 +1,7 @@
 #include "board.h"
 #include <iostream>
 
+
 MyWindow::MyWindow(Point xy, int w, int h, const std::string& title)
     : Simple_window{xy, w, h, title}, quit_button{Point{x_max() - 70, 20}, 70, 20, "Quit", cb_quit}
 {
@@ -66,6 +67,10 @@ Chessboard::Chessboard(Point xy) : MyWindow{xy, width, height, "Chessboard"}, x_
     }
     attach(x_labels);
     attach(y_labels);
+
+    all_possible_steps = nullptr;
+
+    step_chooser = step_color::white;
 }
 
 void Chessboard::clicked(Cell& c)
@@ -77,12 +82,17 @@ void Chessboard::clicked(Cell& c)
     // std::cout << "1\n";
     if (!selected)
     {
-        all_possible_steps = nullptr;
+        //all_possible_steps = nullptr;
         selected = &c;
         c.activate();  // подсвечивает
-        if(selected->has_figure())
-            // Create visual representation of moves for current figure
-            all_possible_steps = c.get_figure().show_possible_steps(c.location(), *this);
+        if(decide() == false)
+        {
+            c.deactivate();
+            selected = nullptr;
+            return;
+        }
+        // Create visual representation of moves for current figure
+        all_possible_steps = c.get_figure().show_possible_steps(c.location(), *this);
         // std::cout << "2\n";
     }
     else
@@ -92,18 +102,19 @@ void Chessboard::clicked(Cell& c)
         {
             if(selected->get_figure().correct_step(*selected, c, *this))
             {
-            //if()
-            // move_figure
-            Cell& c1 = *selected;
-            if(c.has_figure())
-            {
-                //taking the figure from the opponent
-                detach(c.detach_figure());
-                c.attach_figure(c1.detach_figure());
-            }
-            else
-                c.attach_figure(c1.detach_figure());
-            // std::cout << "4\n";
+                //if()
+                // move_figure
+                Cell& c1 = *selected;
+                if(c.has_figure())
+                {
+                    //taking the figure from the opponent
+                    detach(c.detach_figure());
+                    c.attach_figure(c1.detach_figure());
+                }
+                else
+                    c.attach_figure(c1.detach_figure());
+                // std::cout << "4\n";
+                step_swap();
             }
         }
 
@@ -118,4 +129,15 @@ void Chessboard::clicked(Cell& c)
        selected = nullptr;
     }
     Fl::redraw();
+}
+
+bool Chessboard::decide()
+{
+    if(!selected->has_figure())
+        return false;
+    if(step_chooser == step_color::white && selected->get_figure().is_black())
+        return false;
+    else if(step_chooser == step_color::black && selected->get_figure().is_white())
+        return false;
+    return true;
 }
