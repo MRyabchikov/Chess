@@ -69,6 +69,8 @@ int main ()
     chess.at('c', 8).attach_figure(bb0);
     chess.at('f', 8).attach_figure(bb1);
 
+    */
+
     // белые ладьи
     Rook wr0(chess, Figure::Type::white), wr1(chess, Figure::Type::white);
 
@@ -80,6 +82,8 @@ int main ()
 
     chess.at('a', 8).attach_figure(br0);
     chess.at('h', 8).attach_figure(br1);
+
+    /*
 
     // Белый король
     King wk(chess, Figure::Type::white);
@@ -96,7 +100,7 @@ int main ()
 
     chess.at('d', 1).attach_figure(wq);
 
-    // Черный ферщь
+    // Черный ферзь
     Queen bq(chess, Figure::Type::black);
 
     chess.at('d', 8).attach_figure(bq);

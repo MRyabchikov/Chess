@@ -5,7 +5,6 @@
 #include <Graph_lib/Simple_window.h>
 #include "steps_representation.h"
 
-
 constexpr int a_ascii = 97; //ascii code of letter 'a'
 
 
@@ -35,6 +34,8 @@ struct Figure : Graph_lib::Image
 
     //Creates an object "VisualSteps" that is required to show all possible moves of currently clicked figure
     virtual VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) = 0;
+
+    bool change_pos_decider(Cell& c);
                                                                                 
     void draw_lines () const override { Graph_lib::Image::draw_lines(); }
 
@@ -47,6 +48,7 @@ struct Figure : Graph_lib::Image
     void detach () { cell = nullptr; }
 
   private:
+
     bool color;
     static constexpr int r = 0.9 * (80) / 2;
     const Cell* cell{nullptr};
@@ -87,22 +89,10 @@ struct Queen : Figure
 struct Rook : Figure
 {
     Rook(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wR.png" : "bR.png"){};
+
+    bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
+    VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
+
+    void horisontal_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps* & steps_representation);
+    void vertical_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps* & steps_representation);
 };
-
-// struct WhiteChecker : Checker {
-// WhiteChecker(Graph_lib::Window& win) : Checker(win) {
-//     set_fill_color(Graph_lib::Color{17});
-// }
-// bool is_black() const override {
-//     return false;
-// }
-// };
-
-// struct BlackChecker : Checker {
-//     BlackChecker(Graph_lib::Window& win) : Checker(win) {
-//         set_fill_color(Graph_lib::Color{30});
-//     }
-//     bool is_black() const override {
-//         return true;
-//     }
-// };
