@@ -1,6 +1,7 @@
 #include "board.h"
 #include <iostream>
 
+
 MyWindow::MyWindow(Point xy, int w, int h, const std::string& title)
     : Simple_window{xy, w, h, title}, quit_button{Point{x_max() - 70, 20}, 70, 20, "Quit", cb_quit}
 {
@@ -66,10 +67,14 @@ Chessboard::Chessboard(Point xy) : MyWindow{xy, width, height, "Chessboard"}, x_
     }
     attach(x_labels);
     attach(y_labels);
+
+    all_possible_steps = nullptr;
+
+    step_chooser = step_color::white;
 }
 
 void Chessboard::clicked(Cell& c)
-{  // для шашек. Для всего остального удалить
+{   // для шашек. Для всего остального удалить
     // if (!c.is_black()) return; для контроля, кто должен ходить
     //  в c также лежит информация о том, стоит ли фигура на это клетке. (предположительно)
     //  если стоит, то has_checker() == true;
@@ -77,8 +82,17 @@ void Chessboard::clicked(Cell& c)
     // std::cout << "1\n";
     if (!selected)
     {
+        //all_possible_steps = nullptr;
         selected = &c;
         c.activate();  // подсвечивает
+        if(decide() == false)
+        {
+            c.deactivate();
+            selected = nullptr;
+            return;
+        }
+        // Create visual representation of moves for current figure
+        all_possible_steps = c.get_figure().show_possible_steps(c.location(), *this);
         // std::cout << "2\n";
     }
     else
@@ -86,22 +100,53 @@ void Chessboard::clicked(Cell& c)
         // std::cout << "3\n";
         if (selected->has_figure())
         {
-            // move_figure
-            Cell& c1 = *selected;
-            c.attach_figure(c1.detach_figure());
-            // std::cout << "4\n";
+            if(selected->get_figure().correct_step(*selected, c, *this))
+            {
+                //if()
+                // move_figure
+                Cell& c1 = *selected;
+                if(c.has_figure())
+                {
+                    //taking the figure from the opponent
+                    detach(c.detach_figure());
+                    c.attach_figure(c1.detach_figure());
+                }
+                else
+                    c.attach_figure(c1.detach_figure());
+                // std::cout << "4\n";
+                step_swap();
+            }
         }
 
         selected->deactivate();
-        if (selected == &c)
+
+        // Clear the screen from visual representation of possible moves for the current figure
+        if(all_possible_steps != nullptr)
         {
-            selected = nullptr;
+            delete all_possible_steps;
+            all_possible_steps = nullptr;
         }
-        else
-        {
-            selected = &c;
-            c.activate();
-        }
+       selected = nullptr;
     }
     Fl::redraw();
+}
+
+bool Chessboard::decide()
+{
+    if(!selected->has_figure())
+        return false;
+    if(step_chooser == step_color::white && selected->get_figure().is_black())
+        return false;
+    else if(step_chooser == step_color::black && selected->get_figure().is_white())
+        return false;
+    return true;
+}
+
+bool Chessboard::out_of_range(Coordinate pos)
+{
+    if((int(pos.x) < a_ascii) || (int(pos.x) > a_ascii + 7))
+        return true;
+    else if((pos.y < 1) || (pos.y > 8))
+        return true;
+    return false;
 }

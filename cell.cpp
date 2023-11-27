@@ -1,7 +1,9 @@
 #include "cell.h"
 //
 #include "figure.h"
+#include <iostream>
 // #include "pawn.h"
+
 
 using namespace Graph_lib;
 
@@ -12,9 +14,9 @@ void Cell::reset_color()
     if (!pw)
         error("Cell is not attached to a window");
     if (is_black())
-        pw->color(Color::black);
+        pw->color(chess_green);
     else
-        pw->color(Color::white);
+        pw->color(chess_white);
 }
 
 void Cell::attach(Graph_lib::Window& win)
@@ -37,7 +39,20 @@ void Cell::attach_figure(Figure& ch)
     figure = &ch;
 }
 
-const Figure& Cell::get_figure() const
-{  // обязательно нужна проверка не нулевой ли указатель checker
+//removed const and i don't know how it will turn out  
+/*const*/ Figure& Cell::get_figure() const // обязательно нужна проверка не нулевой ли указатель checker                     
+{ 
     return *figure;
+}
+
+Coordinate Cell::location()
+{
+
+    int N = 8;       //Couldn't find a way to properly use
+                     //the static constant from "board.h"
+
+    char x = char((loc.x - DFTBOF)/size + a_ascii);
+    int y = N - (loc.y - DFTBOF)/size;
+
+    return Coordinate{x,y};
 }

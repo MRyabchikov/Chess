@@ -24,8 +24,8 @@ add_executable(
     main.cpp
     cell.cpp 
     board.cpp 
-    
     figure.cpp
+    steps_representation.cpp
     ${LIB_DIR}/Graph_lib/Graph.cpp
     ${LIB_DIR}/Graph_lib/GUI.cpp
     ${LIB_DIR}/Graph_lib/Window.cpp

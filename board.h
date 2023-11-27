@@ -7,6 +7,10 @@
 using Graph_lib::Address;
 using Graph_lib::Point;
 
+
+const Graph_lib::Point Chessboard_location{200,200};
+
+
 class MyWindow : public Simple_window
 {
   public:
@@ -23,6 +27,13 @@ Cell::Type type_of_cell (int i, int j);
 
 struct Chessboard : MyWindow
 {
+
+    enum step_color
+    {
+      white,
+      black
+    };
+
     Chessboard(Point xy);
 
     static constexpr int N = 8;
@@ -34,10 +45,19 @@ struct Chessboard : MyWindow
         int j = c - 'a';
         return cells[i*N + j];
     }
+
+    //friend VisualSteps* Figure::show_possible_steps(Coordinate position, Chessboard& chess);
+
+    bool out_of_range(Coordinate pos);
+
   private:
+
     static constexpr int margin = 30;
     static constexpr int width = N * Cell::size + 2 * margin + 70;
     static constexpr int height = N * Cell::size + 2 * margin;
+
+    step_color step_chooser;
+
     Graph_lib::Vector_ref<Cell> cells;
 
     static void cb_clicked (Address, Address widget)
@@ -48,8 +68,14 @@ struct Chessboard : MyWindow
 
     void clicked (Cell& c);
 
+    bool decide();
+
+    void step_swap() {step_chooser = (step_chooser == step_color::white) ? step_color::black : step_color::white;}
+
     Graph_lib::Marks x_labels;
     Graph_lib::Marks y_labels;
 
     Cell* selected{nullptr};
+
+    VisualSteps* all_possible_steps;
 };

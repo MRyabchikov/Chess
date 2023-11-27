@@ -2,15 +2,21 @@
 #include "cell.h"
 // #include "checker.h"
 #include "figure.h"
+#include <iostream>
+
+
+extern const Graph_lib::Point Chessboard_location;
+
 
 int main ()
 {
-    Chessboard chess({200, 200});
+    Chessboard chess(Chessboard_location);
 
     // белые пешки
-    Pawn wp0(chess, Figure::Type::white), wp1(chess, Figure::Type::white), wp2(chess, Figure::Type::white),
-        wp3(chess, Figure::Type::white), wp4(chess, Figure::Type::white), wp5(chess, Figure::Type::white),
-        wp6(chess, Figure::Type::white), wp7(chess, Figure::Type::white);
+    Pawn wp0(chess, Figure::Type::white), wp1(chess, Figure::Type::white),
+         wp2(chess, Figure::Type::white), wp3(chess, Figure::Type::white),
+         wp4(chess, Figure::Type::white), wp5(chess, Figure::Type::white),
+         wp6(chess, Figure::Type::white), wp7(chess, Figure::Type::white);
 
     chess.at('a', 2).attach_figure(wp0);
     chess.at('b', 2).attach_figure(wp1);
@@ -22,9 +28,10 @@ int main ()
     chess.at('h', 2).attach_figure(wp7);
 
     // черные пешки
-    Pawn bp0(chess, Figure::Type::black), bp1(chess, Figure::Type::black), bp2(chess, Figure::Type::black),
-        bp3(chess, Figure::Type::black), bp4(chess, Figure::Type::black), bp5(chess, Figure::Type::black),
-        bp6(chess, Figure::Type::black), bp7(chess, Figure::Type::black);
+    Pawn bp0(chess, Figure::Type::black), bp1(chess, Figure::Type::black),
+         bp2(chess, Figure::Type::black), bp3(chess, Figure::Type::black),
+         bp4(chess, Figure::Type::black), bp5(chess, Figure::Type::black),
+         bp6(chess, Figure::Type::black), bp7(chess, Figure::Type::black);
 
     chess.at('a', 7).attach_figure(bp0);
     chess.at('b', 7).attach_figure(bp1);
@@ -34,6 +41,7 @@ int main ()
     chess.at('f', 7).attach_figure(bp5);
     chess.at('g', 7).attach_figure(bp6);
     chess.at('h', 7).attach_figure(bp7);
+
 
     // белые кони
     Knight wn0(chess, Figure::Type::white), wn1(chess, Figure::Type::white);
@@ -47,6 +55,7 @@ int main ()
     chess.at('b', 8).attach_figure(bn0);
     chess.at('g', 8).attach_figure(bn1);
 
+
     // белые слоны
     Bishop wb0(chess, Figure::Type::white), wb1(chess, Figure::Type::white);
 
@@ -58,6 +67,7 @@ int main ()
 
     chess.at('c', 8).attach_figure(bb0);
     chess.at('f', 8).attach_figure(bb1);
+
 
     // белые ладьи
     Rook wr0(chess, Figure::Type::white), wr1(chess, Figure::Type::white);
@@ -71,6 +81,8 @@ int main ()
     chess.at('a', 8).attach_figure(br0);
     chess.at('h', 8).attach_figure(br1);
 
+    /*
+
     // Белый король
     King wk(chess, Figure::Type::white);
 
@@ -81,17 +93,21 @@ int main ()
 
     chess.at('e', 8).attach_figure(bk);
 
+    */
+
     // Белый ферзь
     Queen wq(chess, Figure::Type::white);
 
     chess.at('d', 1).attach_figure(wq);
 
-    // Черный ферщь
+    // Черный ферзь
     Queen bq(chess, Figure::Type::black);
 
     chess.at('d', 8).attach_figure(bq);
 
     chess.wait_for_button();
+
+    return 0;
 }
 
 // C:/Projects/build/Chessboard2/chessboard.exe
