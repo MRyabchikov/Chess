@@ -382,3 +382,158 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
     }
     return steps_representation;
 }
+
+bool Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+{
+    int x1 = int(c1.location().x);
+    int y1 = c1.location().y;
+    int x2 = int(c2.location().x);
+    int y2 = c2.location().y;
+
+    if(std::abs(x2-x1) != std::abs(y2-y1))
+        return false;
+    else if(x2 == x1 && y2 == y1)
+        return false;
+
+         if(x2 > x1 && y2 > y1)
+    {
+        int x = x1+1;
+        int y = y1+1;
+
+        while(!chess.out_of_range(Coordinate{char(x),y}) && x < x2 && y < y2)
+        {
+            if(chess.at(char(x), y).has_figure())
+                return false;
+            x++;
+            y++;
+        }
+        if(change_pos_decider(c2) == false)
+            return false;
+    }
+    else if(x2 < x1 && y2 < y1)
+    {
+        int x = x1-1;
+        int y = y1-1;
+
+        while(!chess.out_of_range(Coordinate{char(x),y}) && x > x2 && y > y2)
+        {
+            if(chess.at(char(x), y).has_figure())
+                return false;
+            x--;
+            y--;
+        }
+        if(change_pos_decider(c2) == false)
+            return false;
+    }
+    else if(x2 > x1 && y2 < y1)
+    {
+        int x = x1+1;
+        int y = y1-1;
+
+        while(!chess.out_of_range(Coordinate{char(x),y}) && x < x2 && y > y2)
+        {
+            if(chess.at(char(x), y).has_figure())
+                return false;
+            x++;
+            y--;
+        }
+        if(change_pos_decider(c2) == false)
+            return false;
+    }
+    else if(x2 < x1 && y2 > y1)
+    {
+        int x = x1-1;
+        int y = y1+1;
+
+        while(!chess.out_of_range(Coordinate{char(x),y}) && x > x2 && y < y2)
+        {
+            if(chess.at(char(x), y).has_figure())
+                return false;
+            x--;
+            y++;
+        }
+        if(change_pos_decider(c2) == false)
+            return false;
+    }
+    return true;
+}
+
+VisualSteps* Bishop::show_possible_steps(Coordinate position, Chessboard& chess)
+{
+    VisualSteps* steps_representation = new VisualSteps{chess};
+
+    int x0 = int(position.x);
+    int y0 = position.y;
+
+    int x,y;
+
+    //d1, d2 - decider1, decider2;
+    for(int d1 = -1; d1 <= 1; d1 += 2)
+    {
+        for(int d2 = -1; d2 <= 1; d2 += 2)
+        {
+            x = int(position.x) + d1;
+            y = position.y + d2;
+
+            show_possible_steps_HF(x,y,x0,y0,d1,d2,steps_representation,chess);
+        }
+    }
+
+    /*
+    while(!chess.out_of_range(Coordinate{char(x),y}))
+    {
+        if(correct_step(chess.at(char(x0),y0), chess.at(char(x),y), chess))
+        {
+            if(chess.at(char(x),y).has_figure())
+            {
+                Frame* tempf = new Frame{chess.at(position.x,y).center(), chess};
+                steps_representation->possible_takes.push_back(tempf);
+                chess.attach(*steps_representation->possible_takes.back());
+                //delete tempf;
+                break;
+            }
+            else
+            {
+                Circle* tempc = new Circle{chess.at(x,y).center(), c_size/4};
+                tempc->set_color(Graph_lib::Color::green);
+                tempc->set_fill_color(Graph_lib::Color::green);
+                steps_representation->possible_steps.push_back(tempc);
+                chess.attach(*steps_representation->possible_steps.back());
+            }
+            x++;
+            y++;
+        }
+    }
+    */
+
+    return steps_representation;
+}
+
+void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
+                                    VisualSteps*& steps_representation, Chessboard& chess)
+{
+    while(!chess.out_of_range(Coordinate{char(x),y}))
+    {
+        if(correct_step(chess.at(char(x0),y0), chess.at(char(x),y), chess))
+        {
+            if(chess.at(char(x),y).has_figure())
+            {
+                Frame* tempf = new Frame{chess.at(char(x),y).center(), chess};
+                steps_representation->possible_takes.push_back(tempf);
+                chess.attach(*steps_representation->possible_takes.back());
+                //delete tempf;
+                break;
+            }
+            else
+            {
+                Circle* tempc = new Circle{chess.at(char(x),y).center(), c_size/4};
+                tempc->set_color(Graph_lib::Color::green);
+                tempc->set_fill_color(Graph_lib::Color::green);
+                steps_representation->possible_steps.push_back(tempc);
+                chess.attach(*steps_representation->possible_steps.back());
+            }
+        }
+        x += d1;
+        y += d2;
+    }
+}

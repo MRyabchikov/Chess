@@ -55,7 +55,6 @@ int main ()
     chess.at('b', 8).attach_figure(bn0);
     chess.at('g', 8).attach_figure(bn1);
 
-    /*
 
     // белые слоны
     Bishop wb0(chess, Figure::Type::white), wb1(chess, Figure::Type::white);
@@ -69,7 +68,6 @@ int main ()
     chess.at('c', 8).attach_figure(bb0);
     chess.at('f', 8).attach_figure(bb1);
 
-    */
 
     // белые ладьи
     Rook wr0(chess, Figure::Type::white), wr1(chess, Figure::Type::white);

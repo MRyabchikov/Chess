@@ -74,6 +74,14 @@ struct King : Figure
 struct Bishop : Figure
 {
     Bishop(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wB.png" : "bB.png"){};
+
+    bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
+    VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
+
+    private:
+        //HF - help function
+        void show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
+                                    VisualSteps*& all_possible_steps, Chessboard& chess);
 };
 
 struct Knight : Figure
