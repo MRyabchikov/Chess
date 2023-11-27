@@ -1,6 +1,7 @@
 #include "figure.h"
 #include "board.h"
 #include <algorithm>
+#include <vector>
 #include <iostream>
 
 using Graph_lib::Circle;
@@ -85,9 +86,8 @@ bool Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
             return false;
     }
 }
-
-VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) //Shows all possible
-                                                                               //moves on the board
+                                                                               //Shows all possible
+VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) //moves on the board
 {
     VisualSteps* steps_representation = new VisualSteps{chess};
 
@@ -139,7 +139,7 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) /
     return steps_representation;
 }
 
-bool Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+bool Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess) //Checks if the step is correct
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -160,7 +160,7 @@ bool Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
             if(change_pos_decider(c2) == false)
                 return false;
         }
-        else if(x2 > x1)
+        else if(x2 < x1)
         {
             for(int i = x1 - 1; i > x2; i--)
                 if(chess.at(char(i), y1).has_figure())
@@ -203,6 +203,9 @@ VisualSteps* Rook::show_possible_steps(Coordinate position, Chessboard& chess)
 
 void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps* & steps_representation)
 {
+
+    //Chessboard::step_color reserve = Chessboard::step_chooser;
+
     for(int i = int(position.x)+1; i < a_ascii + 7 + 1; i++)
     {
         if(chess.at(char(i),position.y).has_figure())
@@ -304,4 +307,78 @@ void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, Visu
             //delete tempc;
         }
     }
+}
+
+bool Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+{
+    int x1 = int(c1.location().x);
+    int y1 = c1.location().y;
+    int x2 = int(c2.location().x);
+    int y2 = c2.location().y;
+
+    if(!(std::abs(x2-x1) == 1 || std::abs(x2-x1) == 2) || !(std::abs(y2-y1) == 1 || std::abs(y2-y1) == 2))
+        return false;
+
+    if((std::abs(x2-x1) == 1) && (std::abs(y2-y1) == 2))
+    {
+        if(c2.has_figure())
+        {
+            if(change_pos_decider(c2) == false)
+                return false;
+        }
+    }
+    else if((std::abs(x2-x1) == 2) && (std::abs(y2-y1) == 1))
+    {
+        if(c2.has_figure())
+        {
+            if(change_pos_decider(c2) == false)
+                return false;
+        }
+    }
+    return true;
+}
+
+VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
+{
+
+    VisualSteps* steps_representation = new VisualSteps{chess};
+
+    int x = int(position.x);
+    int y = position.y;
+
+    std::vector<Coordinate> potential_steps;
+
+    for(int i = -1; i <= 1; i += 2)
+        for(int j = -2; j <= 2; j += 4)
+            potential_steps.push_back(Coordinate{char(x+i), y+j});
+    for(int i = -2; i <= 2; i += 4)
+        for(int j = -1; j <= 1; j += 2)
+            potential_steps.push_back(Coordinate{char(x+i), y+j});
+    
+    for(const Coordinate& pos : potential_steps)
+    {
+        if(!chess.out_of_range(pos))
+        {
+            if(correct_step(chess.at(char(x), y), chess.at(pos.x, pos.y), chess))
+            {
+                if(chess.at(pos.x, pos.y).has_figure())
+                {
+                    Frame* tempf = new Frame{chess.at(pos.x,pos.y).center(), chess};
+                    steps_representation->possible_takes.push_back(tempf);
+                    chess.attach(*steps_representation->possible_takes.back());
+                    //delete tempf;
+                }
+                else
+                {
+                    Circle* tempc = new Circle{chess.at(pos.x,pos.y).center(), c_size/4};
+                    tempc->set_color(Graph_lib::Color::green);
+                    tempc->set_fill_color(Graph_lib::Color::green);
+                    steps_representation->possible_steps.push_back(tempc);
+                    chess.attach(*steps_representation->possible_steps.back());
+                    //delete tempc;
+                }
+            }
+        }
+    }
+    return steps_representation;
 }

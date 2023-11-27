@@ -45,6 +45,11 @@ struct Chessboard : MyWindow
         int j = c - 'a';
         return cells[i*N + j];
     }
+
+    //friend VisualSteps* Figure::show_possible_steps(Coordinate position, Chessboard& chess);
+
+    bool out_of_range(Coordinate pos);
+
   private:
 
     static constexpr int margin = 30;

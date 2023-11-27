@@ -13,7 +13,7 @@ using Graph_lib::Point;
 using Graph_lib::Shape;
 
 
-//struct Chessboard;
+struct Chessboard;
 
 
 constexpr int c_size = 80;  //couldn't find a way to get this constant from "cell.h"
@@ -23,7 +23,7 @@ constexpr int c_size = 80;  //couldn't find a way to get this constant from "cel
 //Used when it's needed to highlight, that currently clicked figure can take another
 struct Frame : Rectangle
 {
-    Frame(Point center, Simple_window& chess_);
+    Frame(Point center, /*Simple_window*/Chessboard& chess_);
     ~Frame();
     
     void draw_lines() const override;
@@ -32,21 +32,21 @@ struct Frame : Rectangle
         static constexpr int rc_width = 10;
         static constexpr int rc_length = 30;
 
-        Simple_window* chess; //DANGEROUS (Simple_window but not Chessboard)
+        /*Simple_window*/Chessboard* chess; //DANGEROUS (Simple_window but not Chessboard)
 
-        std::vector<Rectangle*> horisontal_rectangles; //Please check for 
-        std::vector<Rectangle*> vertical_rectangles;   //possible memory leaks
+        std::vector<Rectangle*> horisontal_rectangles;  //Please check for 
+        std::vector<Rectangle*> vertical_rectangles;    //possible memory leaks
 };
 
 
 //Stores all shapes that represent all possible moves for currently clicked figure
 struct VisualSteps
 {
-    VisualSteps(Simple_window& chess_) : chess{&chess_} {}
+    VisualSteps(/*Simple_window*/Chessboard& chess_) : chess{&chess_} {}
     ~VisualSteps();
     std::vector<Frame*> possible_takes;
     std::vector<Graph_lib::Circle*> possible_steps;
 
     private:
-        Simple_window* chess; //DANGEROUS (Simple_window but not Chessboard)
+        /*Simple_window*/Chessboard* chess; //DANGEROUS (Simple_window but not Chessboard)
 };

@@ -43,8 +43,6 @@ int main ()
     chess.at('h', 7).attach_figure(bp7);
 
 
-    /*
-
     // белые кони
     Knight wn0(chess, Figure::Type::white), wn1(chess, Figure::Type::white);
 
@@ -56,6 +54,8 @@ int main ()
 
     chess.at('b', 8).attach_figure(bn0);
     chess.at('g', 8).attach_figure(bn1);
+
+    /*
 
     // белые слоны
     Bishop wb0(chess, Figure::Type::white), wb1(chess, Figure::Type::white);

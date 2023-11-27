@@ -141,3 +141,12 @@ bool Chessboard::decide()
         return false;
     return true;
 }
+
+bool Chessboard::out_of_range(Coordinate pos)
+{
+    if((int(pos.x) < a_ascii) || (int(pos.x) > a_ascii + 7))
+        return true;
+    else if((pos.y < 1) || (pos.y > 8))
+        return true;
+    return false;
+}

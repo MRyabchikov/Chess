@@ -1,7 +1,8 @@
 #include "steps_representation.h"
+#include "board.h"
 
 
-Frame::Frame(Point center, Simple_window& chess_) : 
+Frame::Frame(Point center, /*Simple_window*/Chessboard& chess_) : 
     Rectangle({center.x - c_size/2, center.y - c_size/2}, c_size, c_size)
 {
     Rectangle* h_r1 = new Rectangle{{center.x - c_size/2, center.y - c_size/2}, rc_width, rc_length};
