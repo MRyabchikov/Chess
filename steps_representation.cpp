@@ -2,6 +2,89 @@
 #include "board.h"
 
 
+DangerSign::DangerSign(Point center, Chessboard& chess_) : Circle{center, c_size/2}
+{
+    for(int i = center.x - c_size/4; i <= center.x + c_size/4; i += c_size/2)
+    {
+        for(int j = center.y - c_size/4; j <= center.y + c_size/4; j += c_size/2)
+        {
+            Circle* temporary_circle = new Circle{{i,j}, circle_radius};
+            temporary_circle->set_fill_color(Graph_lib::Color::red);
+            temporary_circle->set_color(Graph_lib::Color::red);
+            circle_of_circles.push_back(temporary_circle);
+        }
+    }
+    for(int i = center.x - c_size/4 - c_size/8; i <= center.x + c_size/4 + c_size/8; i += c_size/4 + c_size/8)
+    {
+        Circle* temporary_circle = new Circle{{i,center.y}, circle_radius};
+        temporary_circle->set_fill_color(Graph_lib::Color::red);
+        temporary_circle->set_color(Graph_lib::Color::red);
+        circle_of_circles.push_back(temporary_circle);
+    }
+    for(int j = center.y - c_size/4 - c_size/8; j <= center.y + c_size/4 + c_size/8; j += c_size/2 + c_size/4)
+    {
+        Circle* temporary_circle = new Circle{{center.x,j}, circle_radius};
+        temporary_circle->set_fill_color(Graph_lib::Color::red);
+        temporary_circle->set_color(Graph_lib::Color::red);
+        circle_of_circles.push_back(temporary_circle);
+    }
+
+    chess = &chess_;
+}
+
+//I am very unsure of this destructor
+DangerSign::~DangerSign()
+{
+    for(int i = (int)circle_of_circles.size() - 1; i >= 0; i--)
+    {
+        //Graph_lib::Circle::~Circle();
+        chess->detach(*circle_of_circles[i]);
+        delete circle_of_circles[i];
+        circle_of_circles.erase(circle_of_circles.begin()+i,circle_of_circles.begin()+i+1);
+        chess->detach(*this);
+    }
+}
+
+void DangerSign::draw_lines() const
+{
+    for(int i = 0; i < int(circle_of_circles.size()); i++)
+        circle_of_circles[i]->draw_lines();
+}
+
+RedCross::RedCross(Point center, Chessboard& chess_) : Rectangle{center, c_size, c_size}
+{
+    int x = center.x;
+    int y = center.y;
+
+    rectangle_1 = new Closed_polyline{{x - c_size/2 + 2*dist, y - c_size/2 + dist},{x + c_size/2 - dist, y + c_size/2 - 2*dist},
+                                      {x + c_size/2 - 2*dist, y + c_size/2 - dist}, {x - c_size/2 + dist, y - c_size/2 + 2*dist}};
+    rectangle_1->set_color(Graph_lib::Color::red);
+    rectangle_1->set_fill_color(Graph_lib::Color::red);
+
+    rectangle_2 = new Closed_polyline{{x + c_size/2 - 2*dist, y - c_size/2 + dist},{x + c_size/2 - dist, y - c_size/2 + 2*dist},
+                                      {x - c_size/2 + 2*dist, y + c_size/2 - dist},{x - c_size/2 + dist, y + c_size/2 - 2*dist}};
+    rectangle_2->set_color(Graph_lib::Color::red);
+    rectangle_2->set_fill_color(Graph_lib::Color::red);
+
+    chess = &chess_;
+}
+
+RedCross::~RedCross()
+{
+    //Graph_lib::Rectangle::~Rectangle();
+    chess->detach(*rectangle_1);
+    delete rectangle_1;
+    chess->detach(*rectangle_2);
+    delete rectangle_2;
+    chess->detach(*this);
+}
+
+void RedCross::draw_lines() const
+{
+    rectangle_1->draw_lines();
+    rectangle_2->draw_lines();
+}
+
 Frame::Frame(Point center, Chessboard& chess_) : 
     Rectangle({center.x - c_size/2, center.y - c_size/2}, c_size, c_size)
 {
