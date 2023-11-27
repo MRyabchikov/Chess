@@ -93,6 +93,8 @@ int main ()
 
     chess.at('e', 8).attach_figure(bk);
 
+    */
+
     // Белый ферзь
     Queen wq(chess, Figure::Type::white);
 
@@ -102,8 +104,6 @@ int main ()
     Queen bq(chess, Figure::Type::black);
 
     chess.at('d', 8).attach_figure(bq);
-
-    */
 
     chess.wait_for_button();
 

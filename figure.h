@@ -81,7 +81,7 @@ struct Bishop : Figure
     private:
         //HF - help function
         void show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
-                                    VisualSteps*& all_possible_steps, Chessboard& chess);
+                                    VisualSteps*& steps_representation, Chessboard& chess);
 };
 
 struct Knight : Figure
@@ -95,6 +95,17 @@ struct Knight : Figure
 struct Queen : Figure
 {
     Queen(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wQ.png" : "bQ.png"){};
+
+    bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
+    VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
+
+    private:
+        void horisontal_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps* & steps_representation);
+        void vertical_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps* & steps_representation);
+        void diagnal_possible_steps(int x, int y, int x0, int y0, Coordinate& position,
+                                    Chessboard& chess, VisualSteps* & steps_representation);
+        void show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
+                                    VisualSteps*& steps_representation, Chessboard& chess);
 };
 
 struct Rook : Figure
@@ -104,6 +115,7 @@ struct Rook : Figure
     bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
 
-    void horisontal_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps* & steps_representation);
-    void vertical_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps* & steps_representation);
+    private:
+        void horisontal_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps* & steps_representation);
+        void vertical_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps* & steps_representation);
 };
