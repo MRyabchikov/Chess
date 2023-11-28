@@ -7,6 +7,7 @@
 
 constexpr int chess_green = 116;
 constexpr int chess_white = 215;
+constexpr int chess_light_yellow = 134; // 134
 
 constexpr int DFTBOF = 30; //distance_from_the_beginning_of_coordinates
 
@@ -37,8 +38,7 @@ struct Cell : Graph_lib::Button
 
     void activate ()
     {
-        if (pw)
-            pw->color(FL_SELECTION_COLOR);
+        if (pw) pw->color(chess_light_yellow);
     }
 
     void deactivate () { reset_color(); }

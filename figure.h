@@ -7,6 +7,7 @@
 
 constexpr int a_ascii = 97; //ascii code of letter 'a'
 
+constexpr int chess_yellow = 133; // 16
 
 struct Cell;
 struct Chessboard;
