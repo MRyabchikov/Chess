@@ -573,7 +573,6 @@ void Queen::diagnal_possible_steps(int x, int y, int x0, int y0, Coordinate& pos
             show_possible_steps_HF(x,y,x0,y0,d1,d2,steps_representation,chess);
         }
     }
-
 }
 
 void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
