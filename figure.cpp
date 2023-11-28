@@ -113,8 +113,8 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) /
             first_step = first_step_reserved; //Костыль
 
             Circle* tempc = new Circle{chess.at(x,y + i*decider).center(), c_size/4};
-            tempc->set_color(Graph_lib::Color::green);
-            tempc->set_fill_color(Graph_lib::Color::green);
+            tempc->set_color(chess_yellow);
+            tempc->set_fill_color(chess_yellow);
             steps_representation->possible_steps.push_back(tempc);
             chess.attach(*steps_representation->possible_steps.back());
             //delete tempc;
@@ -206,8 +206,8 @@ void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, Vi
                 else
                 {
                     Circle* tempc = new Circle{chess.at(char(i),position.y).center(), c_size/4};
-                    tempc->set_color(Graph_lib::Color::green);
-                    tempc->set_fill_color(Graph_lib::Color::green);
+                    tempc->set_color(chess_yellow);
+                    tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
                     chess.attach(*steps_representation->possible_steps.back());
                     //delete tempc;
@@ -237,8 +237,8 @@ void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, Visu
                 else
                 {
                 Circle* tempc = new Circle{chess.at(position.x,i).center(), c_size/4};
-                tempc->set_color(Graph_lib::Color::green);
-                tempc->set_fill_color(Graph_lib::Color::green);
+                tempc->set_color(chess_yellow);
+                tempc->set_fill_color(chess_yellow);
                 steps_representation->possible_steps.push_back(tempc);
                 chess.attach(*steps_representation->possible_steps.back());
                 //delete tempc;
@@ -310,8 +310,8 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
                 else
                 {
                     Circle* tempc = new Circle{chess.at(pos.x,pos.y).center(), c_size/4};
-                    tempc->set_color(Graph_lib::Color::green);
-                    tempc->set_fill_color(Graph_lib::Color::green);
+                    tempc->set_color(chess_yellow);
+                    tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
                     chess.attach(*steps_representation->possible_steps.back());
                     //delete tempc;
@@ -396,8 +396,8 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
             else
             {
                 Circle* tempc = new Circle{chess.at(char(x),y).center(), c_size/4};
-                tempc->set_color(Graph_lib::Color::green);
-                tempc->set_fill_color(Graph_lib::Color::green);
+                tempc->set_color(chess_yellow);
+                tempc->set_fill_color(chess_yellow);
                 steps_representation->possible_steps.push_back(tempc);
                 chess.attach(*steps_representation->possible_steps.back());
             }
@@ -508,8 +508,8 @@ void Queen::horisontal_possible_steps(Coordinate& position, Chessboard& chess, V
                 else
                 {
                     Circle* tempc = new Circle{chess.at(char(i),position.y).center(), c_size/4};
-                    tempc->set_color(Graph_lib::Color::green);
-                    tempc->set_fill_color(Graph_lib::Color::green);
+                    tempc->set_color(chess_yellow);
+                    tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
                     chess.attach(*steps_representation->possible_steps.back());
                     //delete tempc;
@@ -539,8 +539,8 @@ void Queen::vertical_possible_steps(Coordinate& position, Chessboard& chess, Vis
                 else
                 {
                 Circle* tempc = new Circle{chess.at(position.x,i).center(), c_size/4};
-                tempc->set_color(Graph_lib::Color::green);
-                tempc->set_fill_color(Graph_lib::Color::green);
+                tempc->set_color(chess_yellow);
+                tempc->set_fill_color(chess_yellow);
                 steps_representation->possible_steps.push_back(tempc);
                 chess.attach(*steps_representation->possible_steps.back());
                 //delete tempc;
@@ -585,8 +585,8 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
             else
             {
                 Circle* tempc = new Circle{chess.at(char(x),y).center(), c_size/4};
-                tempc->set_color(Graph_lib::Color::green);
-                tempc->set_fill_color(Graph_lib::Color::green);
+                tempc->set_color(chess_yellow);
+                tempc->set_fill_color(chess_yellow);
                 steps_representation->possible_steps.push_back(tempc);
                 chess.attach(*steps_representation->possible_steps.back());
             }
