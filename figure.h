@@ -35,6 +35,12 @@ struct Figure : Graph_lib::Image
     //Creates an object "VisualSteps" that is required to show all possible moves of currently clicked figure
     virtual VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) = 0;
 
+    virtual bool can_take_king(Chessboard& chess) = 0;
+
+    virtual bool is_king() = 0;
+
+    const Cell*& get_cell() {return cell;}
+
     bool change_pos_decider(Cell& c);
                                                                                 
     void draw_lines () const override { Graph_lib::Image::draw_lines(); }
@@ -61,6 +67,9 @@ struct Pawn : Figure
 
     bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
+    virtual bool can_take_king(Chessboard& chess) override;
+    bool is_king() override {return false;}
+
 
     private:
         bool first_step;
@@ -69,6 +78,9 @@ struct Pawn : Figure
 struct King : Figure
 {
     King(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wK.png" : "bK.png"){};
+
+    virtual bool can_take_king(Chessboard& chess) override {return false;};
+    bool is_king() override {return true;}
 };
 
 struct Bishop : Figure
@@ -77,6 +89,8 @@ struct Bishop : Figure
 
     bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
+    virtual bool can_take_king(Chessboard& chess) override {return false;};
+    bool is_king() override {return false;}
 
     private:
         //HF - help function
@@ -90,6 +104,8 @@ struct Knight : Figure
 
     bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
+    virtual bool can_take_king(Chessboard& chess) override {return false;};
+    bool is_king() override {return false;}
 };
 
 struct Queen : Figure
@@ -98,6 +114,8 @@ struct Queen : Figure
 
     bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
+    virtual bool can_take_king(Chessboard& chess) override {return false;};
+    bool is_king() override {return false;}
 
     private:
         void horisontal_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps* & steps_representation);
@@ -114,6 +132,8 @@ struct Rook : Figure
 
     bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
+    virtual bool can_take_king(Chessboard& chess) override {return false;};
+    bool is_king() override {return false;}
 
     private:
         void horisontal_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps* & steps_representation);

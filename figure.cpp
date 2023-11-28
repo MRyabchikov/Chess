@@ -87,6 +87,15 @@ bool Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
     }
 }
                                                                                //Shows all possible
+
+bool Pawn::can_take_king(Chessboard& chess)
+{
+    int x = get_cell()->location().x;
+    int y = get_cell()->location().y;
+
+    //if(chess.at(cell.))
+}
+
 VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) //moves on the board
 {
     VisualSteps* steps_representation = new VisualSteps{chess};
