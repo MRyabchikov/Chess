@@ -1,6 +1,6 @@
 #pragma once
 #include "figure.h"
-//#include "board.h"
+#include <string>
 
 #include <Graph_lib/GUI.h>
 #include <Graph_lib/Graph.h>
@@ -56,7 +56,7 @@ struct Cell : Graph_lib::Button
     bool has_figure () const { return figure != nullptr; }
 
     //removed const and i don't know how it will turn out
-    /*const*/ Figure& get_figure () const;  // обязательно нужна проверка не нулевой ли указатель checker
+    /*const*/ Figure& get_figure ();  // обязательно нужна проверка не нулевой ли указатель checker
 
     Coordinate location(); //gets pair {char x , int y} - coordinate of a cell
   private:
