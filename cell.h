@@ -60,7 +60,9 @@ struct Cell : Graph_lib::Button
 
     Coordinate location() const; //gets pair {char x , int y} - coordinate of a cell
   private:
+
     Type type;
     void reset_color ();
     Figure* figure{nullptr};
+
 };

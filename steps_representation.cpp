@@ -146,8 +146,8 @@ Frame::~Frame()
         chess->detach(*vertical_rectangles[i]);
         delete vertical_rectangles[i];
         vertical_rectangles.erase(vertical_rectangles.begin()+i,vertical_rectangles.begin()+i+1);
-        chess->detach(*this);
     }
+    chess->detach(*this);
 }
 
 void Frame::draw_lines() const

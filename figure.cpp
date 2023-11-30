@@ -102,7 +102,7 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) /
 
     int decider;
 
-    int x = position.x;
+    char x = position.x;
     int y = position.y;
 
     if(is_white())    
@@ -113,7 +113,7 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) /
     if(position.y == int(4.5 + 3.5*decider))  //If pawn has reached the end of the board
         return steps_representation;          //It can't move anymore (for now)
 
-    bool first_step_reserved = first_step; //Костыль
+    bool first_step_reserved = first_step;    //Костыль
 
     for(int i = 1; i <= (first_step ? 2 : 1); i++)
     {
