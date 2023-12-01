@@ -31,10 +31,18 @@ struct Figure : Graph_lib::Image
     }
 
     //Checks if clicked cell satisfies the conditions of a correct move
-    virtual bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) = 0;
+    virtual int correct_step(Cell& c1, Cell& c2, Chessboard& chess) = 0;
 
     //Creates an object "VisualSteps" that is required to show all possible moves of currently clicked figure
     virtual VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) = 0;
+
+    virtual bool is_pawn() { 
+        return false; 
+    }
+
+    virtual bool double_step0() {
+        return false;
+    }
 
     bool change_pos_decider(Cell& c);
                                                                                 
@@ -60,10 +68,20 @@ struct Pawn : Figure
     Pawn(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wP.png" : "bP.png"),
                                                first_step{true} {}
 
-    bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
+    int correct_step(Cell& c1, Cell& c2, Chessboard& chess); 
+
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
 
+    bool is_pawn() override {
+        return true;
+    }
+
+    bool double_step0() override {
+        return double_step;
+    }
+
     private:
+        bool double_step = false;
         bool first_step;
 };
 
@@ -76,7 +94,7 @@ struct Bishop : Figure
 {
     Bishop(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wB.png" : "bB.png"){};
 
-    bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
+    int correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
 
     private:
@@ -89,7 +107,7 @@ struct Knight : Figure
 {
     Knight(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wN.png" : "bN.png"){};
 
-    bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
+    int correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
 };
 
@@ -97,7 +115,7 @@ struct Queen : Figure
 {
     Queen(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wQ.png" : "bQ.png"){};
 
-    bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
+    int correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
 
     private:
@@ -113,7 +131,7 @@ struct Rook : Figure
 {
     Rook(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wR.png" : "bR.png"){};
 
-    bool correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
+    int correct_step(Cell& c1, Cell& c2, Chessboard& chess) override;
     VisualSteps* show_possible_steps(Coordinate position, Chessboard& chess) override;
 
     private:

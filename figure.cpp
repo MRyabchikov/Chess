@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <typeinfo>
 
 using Graph_lib::Circle;
 
@@ -30,19 +31,22 @@ bool Figure::change_pos_decider(Cell& c)
     return true;
 }
 
-bool Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
 {
     int decider;       //Decides whether to move upwards or downwards
-                       //depending on the color of a figure
+                       //depending on the color of a figure. 
+                       //Решает, двигаться ли вверх или вниз, в зависимости от цвета фигуры
 
                        //Decides whether to take the figure or not
     bool take_decider; //If true, it assumes that it's whites' turn
-                       //else - blacks' turn
+                       //else - blacks' turn.
+                       // Решает, брать фигуру или нет, если true, то предполагается, что настала очередь белых,
+                       // в противном случае - очередь черных
 
     if(is_white())    
         decider = 1;   //For some reason ternary operator didn't work so
     else               //I had to set 'decider' value the old-fashioned way
-        decider = -1;
+        decider = -1;  //По какой-то причине тернарный оператор не сработал, поэтому мне пришлось установить значение 'decider' старомодным способом
 
     if(decider == 1)
         take_decider = true;
@@ -53,37 +57,41 @@ bool Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
     int y1 = c1.location().y;
     int x2 = int(c2.location().x);
     int y2 = c2.location().y;
-
-    if(first_step)
+    
+    if (chess.at(char(x1-1), y1).has_figure() && chess.at(char(x1-1), y1).get_figure().is_pawn() && chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1-1), y1).get_figure().is_black() && chess.at(char(x1-1), y1).get_figure().double_step0()) {
+        return 2;
+    } else if (chess.at(char(x1+1), y1).has_figure() && chess.at(char(x1+1), y1).get_figure().is_pawn() && chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1+1), y1).get_figure().is_black() && chess.at(char(x1+1), y1).get_figure().double_step0()) {
+        return 3;
+    } else if(first_step)
     {
         if(x1 == x2 && ((y2 - y1 == 1 * decider) || (y2 - y1 == 2 * decider)) && !c2.has_figure())
         {
-            if(y2 - y1 == 2 * decider)
+            if (y2 - y1 == 2 * decider)
                 if(chess.at(char(x1), y1 + 1 * decider).has_figure())
-                    return false;
+                    return 0;
+            if (y2 - y1 == 2 * decider && double_step == false) double_step = 1;
             first_step = false;
-            return true;
+            return 1;
         }
-        else if((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() &&
-                c2.get_figure().is_black() == take_decider
-                )
+
+        else if((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() && c2.get_figure().is_black() == take_decider)
         {
             first_step = false;
-            return true;
-        }
-        else
-            return false;
+            double_step = false;
+            return 1;
+        } else
+            return 0;
     }
     else
     {
-        if(x1 == x2 && (y2 - y1 == 1 * decider) && !c2.has_figure())
-            return true;
-        else if((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() && 
-                c2.get_figure().is_black() == take_decider
-                )
-            return true;
-        else
-            return false;
+        if(x1 == x2 && (y2 - y1 == 1 * decider) && !c2.has_figure()) {
+            double_step = 0;
+            return 1;
+        } else if((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() && c2.get_figure().is_black() == take_decider) {
+            double_step = 0;
+            return 1;
+        } else
+            return 0;
     }
 }
                                                                                //Shows all possible
@@ -108,8 +116,9 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) /
 
     for(int i = 1; i <= (first_step ? 2 : 1); i++)
     {
-        if(correct_step(chess.at(x,y),chess.at(x,y + i*decider),chess))
+        if(correct_step(chess.at(x,y),chess.at(x,y + i*decider), chess))
         {
+
             first_step = first_step_reserved; //Костыль
 
             Circle* tempc = new Circle{chess.at(x,y + i*decider).center(), c_size/4};
@@ -124,22 +133,26 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) /
     {
         if(!(int(x) + i < a_ascii || int(x) + i > 7 + a_ascii))
         {
-            if(correct_step(chess.at(x, y),chess.at(char(int(x) + i), y + decider*1), chess))
-            {
-
+            int a = correct_step(chess.at(x, y), chess.at(char(int(x) + i), y + decider*1), chess);
+            if(a)
+            {   
                 first_step = first_step_reserved; //Костыль
 
-                Frame* tempf = new Frame{chess.at(char(int(x) + i),y + decider).center(), chess};
+                Frame* tempf;
+                if (a == 1) tempf = new Frame{chess.at(char(int(x) + i),y + decider).center(), chess};
+                if (a == 2) tempf = new Frame{chess.at(char(int(x) - 1),y + decider).center(), chess};
+                if (a == 3) tempf = new Frame{chess.at(char(int(x) + 1),y + decider).center(), chess};
                 steps_representation->possible_takes.push_back(tempf);
                 chess.attach(*steps_representation->possible_takes.back());
                 //delete tempf;
             }
+            
         }
     }
     return steps_representation;
 }
 
-bool Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess) //Checks if the step is correct
+int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess) //Checks if the step is correct
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -248,7 +261,7 @@ void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, Visu
     }
 }
 
-bool Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -322,7 +335,7 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
     return steps_representation;
 }
 
-bool Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -407,7 +420,7 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
     }
 }
 
-bool Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
