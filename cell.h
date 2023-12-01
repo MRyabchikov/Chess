@@ -58,9 +58,11 @@ struct Cell : Graph_lib::Button
     //removed const and i don't know how it will turn out
     /*const*/ Figure& get_figure ();  // обязательно нужна проверка не нулевой ли указатель checker
 
-    Coordinate location(); //gets pair {char x , int y} - coordinate of a cell
+    Coordinate location() const; //gets pair {char x , int y} - coordinate of a cell
   private:
+
     Type type;
     void reset_color ();
     Figure* figure{nullptr};
+
 };

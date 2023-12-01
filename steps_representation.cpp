@@ -145,7 +145,6 @@ Frame::~Frame()
         horisontal_rectangles.erase(horisontal_rectangles.begin()+i,horisontal_rectangles.begin()+i+1);
         chess->detach(*vertical_rectangles[i]);
         delete vertical_rectangles[i];
-        vertical_rectangles.erase(vertical_rectangles.begin()+i,vertical_rectangles.begin()+i+1); 
     }
     chess->detach(*this);
 }

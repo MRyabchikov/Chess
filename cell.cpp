@@ -46,7 +46,7 @@ void Cell::attach_figure(Figure& ch)
     return *figure;
 }
 
-Coordinate Cell::location()
+Coordinate Cell::location() const
 {
 
     int N = 8;       //Couldn't find a way to properly use
