@@ -1,12 +1,13 @@
 #pragma once
 #include "figure.h"
-//#include "board.h"
+#include <string>
 
 #include <Graph_lib/GUI.h>
 #include <Graph_lib/Graph.h>
 
 constexpr int chess_green = 116;
 constexpr int chess_white = 215;
+constexpr int chess_light_yellow = 134; // 134
 
 constexpr int DFTBOF = 30; //distance_from_the_beginning_of_coordinates
 
@@ -37,8 +38,7 @@ struct Cell : Graph_lib::Button
 
     void activate ()
     {
-        if (pw)
-            pw->color(FL_SELECTION_COLOR);
+        if (pw) pw->color(chess_light_yellow);
     }
 
     void deactivate () { reset_color(); }
@@ -56,7 +56,7 @@ struct Cell : Graph_lib::Button
     bool has_figure () const { return figure != nullptr; }
 
     //removed const and i don't know how it will turn out
-    /*const*/ Figure& get_figure () const;  // обязательно нужна проверка не нулевой ли указатель checker
+    /*const*/ Figure& get_figure ();  // обязательно нужна проверка не нулевой ли указатель checker
 
     Coordinate location(); //gets pair {char x , int y} - coordinate of a cell
   private:
