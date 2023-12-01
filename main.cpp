@@ -105,11 +105,6 @@ int main ()
 
     chess.at('d', 8).attach_figure(bq);
 
-    //DangerSign ds{chess.at('c',4).center(), chess};
-    //chess.attach(ds);
-    //RedCross rc{chess.at('f',4).center(), chess};
-    //chess.attach(rc);
-    
     chess.wait_for_button();
 
     return 0;

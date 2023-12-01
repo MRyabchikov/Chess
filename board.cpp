@@ -100,20 +100,31 @@ void Chessboard::clicked(Cell& c)
         // std::cout << "3\n";
         if (selected->has_figure())
         {
-            if(selected->get_figure().correct_step(*selected, c, *this))
+            int a = selected->get_figure().correct_step(*selected, c, *this);
+            if(a)
             {
                 //if()
                 // move_figure
                 Cell& c1 = *selected;
+                int x = c.location().x, y = c.location().y;
+
+                int b;
+                if (step_chooser == black) b = 1;
+                else b = -1;
                 if(c.has_figure())
                 {
                     //taking the figure from the opponent
-                    detach(c.detach_figure());
+                    detach(c.detach_figure()); // убираем фигуру врага
+                    c.attach_figure(c1.detach_figure()); // переносим свою
+                }
+                else if (1 <= y + b && y + b < 7 && (*this).at(x, y + b).has_figure() && (a == 2 or a == 3)) {
+                    detach((*this).at(x, y + b).detach_figure()); // *this = chess
+                    (*this).at(x, y).attach_figure(c1.detach_figure());
+                }
+                else {
                     c.attach_figure(c1.detach_figure());
                 }
-                else
-                    c.attach_figure(c1.detach_figure());
-                // std::cout << "4\n";
+
                 step_swap();
             }
         }

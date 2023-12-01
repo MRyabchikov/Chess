@@ -17,6 +17,8 @@ using Graph_lib::Closed_polyline;
 
 struct Chessboard;
 
+constexpr int c_size = 80;  // couldn't find a way to get this constant from "cell.h"
+
 
 constexpr int c_size = 80;  //couldn't find a way to get this constant from "cell.h"
 
@@ -77,6 +79,7 @@ struct Frame : Rectangle
 struct VisualSteps
 {
     VisualSteps(Chessboard& chess_) : chess{&chess_} {}
+
     ~VisualSteps();
     std::vector<Frame*> possible_takes;
     std::vector<Graph_lib::Circle*> possible_steps;
