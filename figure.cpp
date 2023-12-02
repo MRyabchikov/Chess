@@ -31,20 +31,24 @@ bool Figure::change_pos_decider(Cell& c)
     return true;
 }
 
-int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
+int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
 {
     int decider;  // Decides whether to move upwards or downwards
                   // depending on the color of a figure.
+                  // Решает, двигаться ли вверх или вниз, в зависимости от цвета фигуры
 
     // Decides whether to take the figure or not
     bool take_decider;  // If true, it assumes that it's whites' turn
                         // else - blacks' turn.
-    int returning_value = 0;
+                        //  Решает, брать фигуру или нет, если true, то предполагается, что настала очередь белых,
+                        //  в противном случае - очередь черных
 
     if (is_white())
-        decider = 1;  // For some reason ternary operator didn't work so
-    else              // I had to set 'decider' value the old-fashioned way
-        decider = -1;
+        decider = 1;   // For some reason ternary operator didn't work so
+    else               // I had to set 'decider' value the old-fashioned way
+        decider = -1;  // По какой-то причине тернарный оператор не сработал, поэтому мне пришлось установить значение
+                       // 'decider' старомодным способом
+
     if (decider == 1)
         take_decider = true;
     else
@@ -59,7 +63,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1 - 1), y1).get_figure().is_black() &&
         chess.at(char(x1 - 1), y1).get_figure().double_step0())
     {
-        returning_value = 2;
+        return 2;
     }
     else if (chess.at(char(x1 + 1), y1).has_figure() && chess.at(char(x1 + 1), y1).get_figure().is_pawn() &&
              chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1 + 1), y1).get_figure().is_black() &&
@@ -77,7 +81,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             if (y2 - y1 == 2 * decider && double_step == false)
                 double_step = 1;
             first_step = false;
-            returning_value = 1;
+            return 1;
         }
 
         else if ((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() &&
@@ -85,7 +89,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         {
             first_step = false;
             double_step = false;
-            returning_value = 1;
+            return 1;
         }
         else
             return 0;
@@ -95,33 +99,28 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         if (x1 == x2 && (y2 - y1 == 1 * decider) && !c2.has_figure())
         {
             double_step = 0;
-            returning_value = 1;
+            return 1;
         }
         else if ((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() &&
                  c2.get_figure().is_black() == take_decider)
         {
             double_step = 0;
-            returning_value = 1;
+            return 1;
         }
         else
             return 0;
     }
-    if (ensure_king_is_safe == false)
-        return returning_value;
-    else
-    {
-        c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
-        {
-            c1.attach_figure(c2.detach_figure());
-            return 0;
-        }
-        else
-        {
-            c1.attach_figure(c2.detach_figure());
-            return returning_value;
-        }
-    }
+}
+
+// Shows all possible
+
+bool Pawn::can_take_king(Chessboard& chess)
+{
+    int x = get_cell()->location().x;
+    int y = get_cell()->location().y;
+    return false;
+
+    // if(chess.at(cell.))
 }
 
 VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  // moves on the board
@@ -186,7 +185,7 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
     return steps_representation;
 }
 
-int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
+int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess)  // Checks if the step is correct
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -220,22 +219,7 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         if (change_pos_decider(c2) == false)
             return false;
     }
-    if (ensure_king_is_safe == false)
-        return true;
-    else
-    {
-        c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
-        {
-            c1.attach_figure(c2.detach_figure());
-            return false;
-        }
-        else
-        {
-            c1.attach_figure(c2.detach_figure());
-            return true;
-        }
-    }
+    return true;
 }
 
 VisualSteps* Rook::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -310,7 +294,7 @@ void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, Visu
     }
 }
 
-int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
+int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -336,22 +320,7 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
                 return false;
         }
     }
-    if (ensure_king_is_safe == false)
-        return true;
-    else
-    {
-        c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
-        {
-            c1.attach_figure(c2.detach_figure());
-            return false;
-        }
-        else
-        {
-            c1.attach_figure(c2.detach_figure());
-            return true;
-        }
-    }
+    return true;
 }
 
 VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -399,7 +368,7 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
     return steps_representation;
 }
 
-int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
+int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -428,22 +397,7 @@ int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
     }
     if (change_pos_decider(c2) == false)
         return false;
-    if (ensure_king_is_safe == false)
-        return true;
-    else
-    {
-        c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
-        {
-            c1.attach_figure(c2.detach_figure());
-            return false;
-        }
-        else
-        {
-            c1.attach_figure(c2.detach_figure());
-            return true;
-        }
-    }
+    return true;
 }
 
 VisualSteps* Bishop::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -499,7 +453,7 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
     }
 }
 
-int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
+int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -561,22 +515,7 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_
         if (change_pos_decider(c2) == false)
             return false;
     }
-    if (ensure_king_is_safe == false)
-        return true;
-    else
-    {
-        c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
-        {
-            c1.attach_figure(c2.detach_figure());
-            return false;
-        }
-        else
-        {
-            c1.attach_figure(c2.detach_figure());
-            return true;
-        }
-    }
+    return true;
 }
 
 VisualSteps* Queen::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -702,7 +641,7 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
     }
 }
 
-int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
+int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
 {
     int x1 = int(c1.location().x), x2 = int(c2.location().x);
     int y1 = c1.location().y, y2 = c2.location().y;
@@ -710,22 +649,7 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         return false;
     if (change_pos_decider(c2) == false)
         return false;
-    if (ensure_king_is_safe == false)
-        return true;
-    else
-    {
-        c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
-        {
-            c1.attach_figure(c2.detach_figure());
-            return false;
-        }
-        else
-        {
-            c1.attach_figure(c2.detach_figure());
-            return true;
-        }
-    }
+    return true;
 }
 
 VisualSteps* King::show_possible_steps(Coordinate position, Chessboard& chess)
