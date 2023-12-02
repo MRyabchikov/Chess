@@ -110,18 +110,33 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         return returning_value;
     else
     {
-        c1.detach_figure();
-        c2.attach_figure(*this);
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
+        c2.attach_figure(c1.detach_figure());
         if (King_is_under_attack(chess, c2.get_figure().is_white()))
         {
-            c2.detach_figure();
-            c1.attach_figure(*this);
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return 0;
         }
         else
         {
-            c2.detach_figure();
-            c1.attach_figure(*this);
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return returning_value;
         }
     }
@@ -227,15 +242,33 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         return true;
     else
     {
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
         c2.attach_figure(c1.detach_figure());
         if (King_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return false;
         }
         else
         {
             c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return true;
         }
     }
@@ -343,15 +376,33 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
         return true;
     else
     {
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
         c2.attach_figure(c1.detach_figure());
         if (King_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return false;
         }
         else
         {
             c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return true;
         }
     }
@@ -435,15 +486,33 @@ int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
         return true;
     else
     {
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
         c2.attach_figure(c1.detach_figure());
         if (King_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return false;
         }
         else
         {
             c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return true;
         }
     }
@@ -568,15 +637,33 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_
         return true;
     else
     {
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
         c2.attach_figure(c1.detach_figure());
         if (King_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return false;
         }
         else
         {
             c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return true;
         }
     }
@@ -717,15 +804,33 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         return true;
     else
     {
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
         c2.attach_figure(c1.detach_figure());
         if (King_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return false;
         }
         else
         {
             c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
             return true;
         }
     }
