@@ -110,15 +110,18 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         return returning_value;
     else
     {
-        c2.attach_figure(c1.detach_figure());
+        c1.detach_figure();
+        c2.attach_figure(*this);
         if (King_is_under_attack(chess, c2.get_figure().is_white()))
         {
-            c1.attach_figure(c2.detach_figure());
+            c2.detach_figure();
+            c1.attach_figure(*this);
             return 0;
         }
         else
         {
-            c1.attach_figure(c2.detach_figure());
+            c2.detach_figure();
+            c1.attach_figure(*this);
             return returning_value;
         }
     }
