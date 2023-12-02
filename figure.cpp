@@ -31,7 +31,7 @@ bool Figure::change_pos_decider(Cell& c)
     return true;
 }
 
-int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int decider;  // Decides whether to move upwards or downwards
                   // depending on the color of a figure.
@@ -40,15 +40,12 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
     // Decides whether to take the figure or not
     bool take_decider;  // If true, it assumes that it's whites' turn
                         // else - blacks' turn.
-                        //  Решает, брать фигуру или нет, если true, то предполагается, что настала очередь белых,
-                        //  в противном случае - очередь черных
+    int returning_value = 0;
 
     if (is_white())
-        decider = 1;   // For some reason ternary operator didn't work so
-    else               // I had to set 'decider' value the old-fashioned way
-        decider = -1;  // По какой-то причине тернарный оператор не сработал, поэтому мне пришлось установить значение
-                       // 'decider' старомодным способом
-
+        decider = 1;  // For some reason ternary operator didn't work so
+    else              // I had to set 'decider' value the old-fashioned way
+        decider = -1;
     if (decider == 1)
         take_decider = true;
     else
@@ -63,7 +60,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
         chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1 - 1), y1).get_figure().is_black() &&
         chess.at(char(x1 - 1), y1).get_figure().double_step0())
     {
-        return 2;
+        returning_value = 2;
     }
     else if (chess.at(char(x1 + 1), y1).has_figure() && chess.at(char(x1 + 1), y1).get_figure().is_pawn() &&
              chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1 + 1), y1).get_figure().is_black() &&
@@ -81,7 +78,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
             if (y2 - y1 == 2 * decider && double_step == false)
                 double_step = 1;
             first_step = false;
-            return 1;
+            returning_value = 1;
         }
 
         else if ((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() &&
@@ -89,7 +86,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
         {
             first_step = false;
             double_step = false;
-            return 1;
+            returning_value = 1;
         }
         else
             return 0;
@@ -99,28 +96,51 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
         if (x1 == x2 && (y2 - y1 == 1 * decider) && !c2.has_figure())
         {
             double_step = 0;
-            return 1;
+            returning_value = 1;
         }
         else if ((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() &&
                  c2.get_figure().is_black() == take_decider)
         {
             double_step = 0;
-            return 1;
+            returning_value = 1;
         }
         else
             return 0;
     }
-}
-
-// Shows all possible
-
-bool Pawn::can_take_king(Chessboard& chess)
-{
-    int x = get_cell()->location().x;
-    int y = get_cell()->location().y;
-    return false;
-
-    // if(chess.at(cell.))
+    if (ensure_king_is_safe == false)
+        return returning_value;
+    else
+    {
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return 0;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return returning_value;
+        }
+    }
 }
 
 VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  // moves on the board
@@ -185,7 +205,7 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
     return steps_representation;
 }
 
-int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess)  // Checks if the step is correct
+int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -219,7 +239,40 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess)  // Checks if the 
         if (change_pos_decider(c2) == false)
             return false;
     }
-    return true;
+    if (ensure_king_is_safe == false)
+        return true;
+    else
+    {
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return false;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return true;
+        }
+    }
 }
 
 VisualSteps* Rook::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -294,7 +347,7 @@ void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, Visu
     }
 }
 
-int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -320,7 +373,40 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
                 return false;
         }
     }
-    return true;
+    if (ensure_king_is_safe == false)
+        return true;
+    else
+    {
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return false;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return true;
+        }
+    }
 }
 
 VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -368,7 +454,7 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
     return steps_representation;
 }
 
-int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -397,7 +483,40 @@ int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
     }
     if (change_pos_decider(c2) == false)
         return false;
-    return true;
+    if (ensure_king_is_safe == false)
+        return true;
+    else
+    {
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return false;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return true;
+        }
+    }
 }
 
 VisualSteps* Bishop::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -453,7 +572,7 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
     }
 }
 
-int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -515,7 +634,40 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
         if (change_pos_decider(c2) == false)
             return false;
     }
-    return true;
+    if (ensure_king_is_safe == false)
+        return true;
+    else
+    {
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return false;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return true;
+        }
+    }
 }
 
 VisualSteps* Queen::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -641,7 +793,7 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
     }
 }
 
-int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int x1 = int(c1.location().x), x2 = int(c2.location().x);
     int y1 = c1.location().y, y2 = c2.location().y;
@@ -649,7 +801,40 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
         return false;
     if (change_pos_decider(c2) == false)
         return false;
-    return true;
+    if (ensure_king_is_safe == false)
+        return true;
+    else
+    {
+        bool has_deleted_figure = false;
+        Figure* tmp = nullptr;
+        if (c2.has_figure())
+        {
+            tmp = &(c2.get_figure());
+            chess.detach(c2.detach_figure());
+            has_deleted_figure = true;
+        }
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return false;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            if (has_deleted_figure)
+            {
+                c2.attach_figure(*tmp);
+                chess.attach(*tmp);
+            }
+            return true;
+        }
+    }
 }
 
 VisualSteps* King::show_possible_steps(Coordinate position, Chessboard& chess)
