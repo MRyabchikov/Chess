@@ -31,12 +31,15 @@ struct Figure : Graph_lib::Image
     }
 
     // Checks if clicked cell satisfies the conditions of a correct move
-    virtual int correct_step (Cell& c1, Cell& c2, Chessboard& chess) = 0;
+    virtual int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) = 0;
 
     // Creates an object "VisualSteps" that is required to show all possible moves of currently clicked figure
     virtual VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) = 0;
 
-    virtual bool can_take_king (Chessboard& chess) = 0;
+    virtual bool can_take_king (Chessboard& chess, Cell& king_position)
+    {
+        return correct_step(*(const_cast<Cell*>(cell)), king_position, chess, false);
+    }
 
     virtual bool is_king () = 0;
 
@@ -64,6 +67,8 @@ struct Figure : Graph_lib::Image
     const Cell* cell{nullptr};
 };
 
+bool King_is_under_attack (Chessboard& chess, bool is_white) { return false; }
+
 struct Pawn : Figure
 {
     Pawn(Graph_lib::Window& win, Figure::Type color)
@@ -71,10 +76,9 @@ struct Pawn : Figure
     {
     }
 
-    int correct_step (Cell& c1, Cell& c2, Chessboard& chess);
+    int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true);
 
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
-    virtual bool can_take_king (Chessboard& chess) override;
 
     bool is_king () override { return false; }
 
@@ -91,9 +95,7 @@ struct King : Figure
 {
     King(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wK.png" : "bK.png"){};
 
-    virtual bool can_take_king (Chessboard& chess) override { return false; };
-
-    int correct_step (Cell& c1, Cell& c2, Chessboard& chess) override;
+    int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
 
     bool is_king () override { return true; }
@@ -104,10 +106,8 @@ struct Bishop : Figure
     Bishop(Graph_lib::Window& win, Figure::Type color)
         : Figure(win, color, color == Type::white ? "wB.png" : "bB.png"){};
 
-    int correct_step (Cell& c1, Cell& c2, Chessboard& chess) override;
+    int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
-
-    virtual bool can_take_king (Chessboard& chess) override { return false; };
 
     bool is_king () override { return false; }
 
@@ -122,10 +122,8 @@ struct Knight : Figure
     Knight(Graph_lib::Window& win, Figure::Type color)
         : Figure(win, color, color == Type::white ? "wN.png" : "bN.png"){};
 
-    int correct_step (Cell& c1, Cell& c2, Chessboard& chess) override;
+    int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
-
-    virtual bool can_take_king (Chessboard& chess) override { return false; };
 
     bool is_king () override { return false; }
 };
@@ -135,10 +133,8 @@ struct Queen : Figure
     Queen(Graph_lib::Window& win, Figure::Type color)
         : Figure(win, color, color == Type::white ? "wQ.png" : "bQ.png"){};
 
-    int correct_step (Cell& c1, Cell& c2, Chessboard& chess) override;
+    int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
-
-    virtual bool can_take_king (Chessboard& chess) override { return false; };
 
     bool is_king () override { return false; }
 
@@ -155,10 +151,8 @@ struct Rook : Figure
 {
     Rook(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "wR.png" : "bR.png"){};
 
-    int correct_step (Cell& c1, Cell& c2, Chessboard& chess) override;
+    int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
-
-    virtual bool can_take_king (Chessboard& chess) override { return false; };
 
     bool is_king () override { return false; }
 
