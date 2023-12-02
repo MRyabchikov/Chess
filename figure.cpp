@@ -2,8 +2,8 @@
 #include "board.h"
 #include <algorithm>
 #include <iostream>
-#include <vector>
 #include <typeinfo>
+#include <vector>
 
 using Graph_lib::Circle;
 
@@ -15,96 +15,116 @@ void Figure::attach(const Cell& c)
 
 bool Figure::change_pos_decider(Cell& c)
 {
-    if(c.has_figure())
+    if (c.has_figure())
     {
-        if(is_white())
+        if (is_white())
         {
-            if(c.get_figure().is_white())
+            if (c.get_figure().is_white())
                 return false;
         }
-        else if(is_black())
+        else if (is_black())
         {
-            if(c.get_figure().is_black())
+            if (c.get_figure().is_black())
                 return false;
         }
     }
     return true;
 }
 
-int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
-    int decider;       //Decides whether to move upwards or downwards
-                       //depending on the color of a figure. 
-                       //Решает, двигаться ли вверх или вниз, в зависимости от цвета фигуры
+    int decider;  // Decides whether to move upwards or downwards
+                  // depending on the color of a figure.
 
-                       //Decides whether to take the figure or not
-    bool take_decider; //If true, it assumes that it's whites' turn
-                       //else - blacks' turn.
-                       // Решает, брать фигуру или нет, если true, то предполагается, что настала очередь белых,
-                       // в противном случае - очередь черных
+    // Decides whether to take the figure or not
+    bool take_decider;  // If true, it assumes that it's whites' turn
+                        // else - blacks' turn.
+    int returning_value = 0;
 
-    if(is_white())    
-        decider = 1;   //For some reason ternary operator didn't work so
-    else               //I had to set 'decider' value the old-fashioned way
-        decider = -1;  //По какой-то причине тернарный оператор не сработал, поэтому мне пришлось установить значение 'decider' старомодным способом
-
-    if(decider == 1)
+    if (is_white())
+        decider = 1;  // For some reason ternary operator didn't work so
+    else              // I had to set 'decider' value the old-fashioned way
+        decider = -1;
+    if (decider == 1)
         take_decider = true;
     else
         take_decider = false;
-    
+
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
     int x2 = int(c2.location().x);
     int y2 = c2.location().y;
-    
-    if (chess.at(char(x1-1), y1).has_figure() && chess.at(char(x1-1), y1).get_figure().is_pawn() && chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1-1), y1).get_figure().is_black() && chess.at(char(x1-1), y1).get_figure().double_step0()) {
-        return 2;
-    } else if (chess.at(char(x1+1), y1).has_figure() && chess.at(char(x1+1), y1).get_figure().is_pawn() && chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1+1), y1).get_figure().is_black() && chess.at(char(x1+1), y1).get_figure().double_step0()) {
-        return 3;
-    } else if(first_step)
+
+    if (chess.at(char(x1 - 1), y1).has_figure() && chess.at(char(x1 - 1), y1).get_figure().is_pawn() &&
+        chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1 - 1), y1).get_figure().is_black() &&
+        chess.at(char(x1 - 1), y1).get_figure().double_step0())
     {
-        if(x1 == x2 && ((y2 - y1 == 1 * decider) || (y2 - y1 == 2 * decider)) && !c2.has_figure())
+        returning_value = 2;
+    }
+    else if (chess.at(char(x1 + 1), y1).has_figure() && chess.at(char(x1 + 1), y1).get_figure().is_pawn() &&
+             chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1 + 1), y1).get_figure().is_black() &&
+             chess.at(char(x1 + 1), y1).get_figure().double_step0())
+    {
+        return 3;
+    }
+    else if (first_step)
+    {
+        if (x1 == x2 && ((y2 - y1 == 1 * decider) || (y2 - y1 == 2 * decider)) && !c2.has_figure())
         {
             if (y2 - y1 == 2 * decider)
-                if(chess.at(char(x1), y1 + 1 * decider).has_figure())
+                if (chess.at(char(x1), y1 + 1 * decider).has_figure())
                     return 0;
-            if (y2 - y1 == 2 * decider && double_step == false) double_step = 1;
+            if (y2 - y1 == 2 * decider && double_step == false)
+                double_step = 1;
             first_step = false;
-            return 1;
+            returning_value = 1;
         }
 
-        else if((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() && c2.get_figure().is_black() == take_decider)
+        else if ((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() &&
+                 c2.get_figure().is_black() == take_decider)
         {
             first_step = false;
             double_step = false;
-            return 1;
-        } else
+            returning_value = 1;
+        }
+        else
             return 0;
     }
     else
     {
-        if(x1 == x2 && (y2 - y1 == 1 * decider) && !c2.has_figure()) {
+        if (x1 == x2 && (y2 - y1 == 1 * decider) && !c2.has_figure())
+        {
             double_step = 0;
-            return 1;
-        } else if((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() && c2.get_figure().is_black() == take_decider) {
+            returning_value = 1;
+        }
+        else if ((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() &&
+                 c2.get_figure().is_black() == take_decider)
+        {
             double_step = 0;
-            return 1;
-        } else
+            returning_value = 1;
+        }
+        else
             return 0;
     }
+    if (ensure_king_is_safe == false)
+        return returning_value;
+    else
+    {
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            return 0;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            return returning_value;
+        }
+    }
 }
-                                                                               //Shows all possible
 
-bool Pawn::can_take_king(Chessboard& chess)
-{
-    int x = get_cell()->location().x;
-    int y = get_cell()->location().y;
-
-    //if(chess.at(cell.))
-}
-
-VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) //moves on the board
+VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  // moves on the board
 {
     VisualSteps* steps_representation = new VisualSteps{chess};
 
@@ -113,42 +133,42 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) /
     char x = position.x;
     int y = position.y;
 
-    if(is_white())    
-        decider = 1;   
-    else               
+    if (is_white())
+        decider = 1;
+    else
         decider = -1;
 
     if (position.y == int(4.5 + 3.5 * decider))  // If pawn has reached the end of the board
         return steps_representation;             // It can't move anymore (for now)
 
-    if(position.y == int(4.5 + 3.5*decider))  //If pawn has reached the end of the board
-        return steps_representation;          //It can't move anymore (for now)
+    if (position.y == int(4.5 + 3.5 * decider))  // If pawn has reached the end of the board
+        return steps_representation;             // It can't move anymore (for now)
 
-    bool first_step_reserved = first_step;    //Костыль
+    bool first_step_reserved = first_step;  // Костыль
 
-    for(int i = 1; i <= (first_step ? 2 : 1); i++)
+    for (int i = 1; i <= (first_step ? 2 : 1); i++)
     {
-        if(correct_step(chess.at(x,y),chess.at(x,y + i*decider), chess))
+        if (correct_step(chess.at(x, y), chess.at(x, y + i * decider), chess))
         {
 
-            first_step = first_step_reserved; //Костыль
+            first_step = first_step_reserved;  // Костыль
 
-            Circle* tempc = new Circle{chess.at(x,y + i*decider).center(), c_size/4};
+            Circle* tempc = new Circle{chess.at(x, y + i * decider).center(), c_size / 4};
             tempc->set_color(chess_yellow);
             tempc->set_fill_color(chess_yellow);
             steps_representation->possible_steps.push_back(tempc);
             chess.attach(*steps_representation->possible_steps.back());
-            //delete tempc;
+            // delete tempc;
         }
     }
-    for(int i = -1; i <= 1; i += 2)
+    for (int i = -1; i <= 1; i += 2)
     {
-        if(!(int(x) + i < a_ascii || int(x) + i > 7 + a_ascii))
+        if (!(int(x) + i < a_ascii || int(x) + i > 7 + a_ascii))
         {
-            int a = correct_step(chess.at(x, y), chess.at(char(int(x) + i), y + decider*1), chess);
-            if(a)
-            {   
-                first_step = first_step_reserved; //Костыль
+            int a = correct_step(chess.at(x, y), chess.at(char(int(x) + i), y + decider * 1), chess);
+            if (a)
+            {
+                first_step = first_step_reserved;  // Костыль
 
                 Frame* tempf;
                 if (a == 1)
@@ -166,41 +186,56 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess) /
     return steps_representation;
 }
 
-int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess) //Checks if the step is correct
+int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
     int x2 = int(c2.location().x);
     int y2 = c2.location().y;
 
-    if((x1 != x2) && (y1 != y2))
+    if ((x1 != x2) && (y1 != y2))
         return false;
-    if((x1 == x2) && (y1 == y2))
+    if ((x1 == x2) && (y1 == y2))
         return false;
 
-    int d; //d - decider, used to reduce copy + paste
-    
-    if((x1 != x2) && (y1 == y2))
+    int d;  // d - decider, used to reduce copy + paste
+
+    if ((x1 != x2) && (y1 == y2))
     {
         d = (x2 > x1) ? 1 : -1;
-        
-        for(int i = x1 + d; i != x2; i += d)
-            if(chess.at(char(i), y1).has_figure())
+
+        for (int i = x1 + d; i != x2; i += d)
+            if (chess.at(char(i), y1).has_figure())
                 return false;
-        if(change_pos_decider(c2) == false)
+        if (change_pos_decider(c2) == false)
             return false;
     }
-    if((x1 == x2) && (y1 != y2))
+    if ((x1 == x2) && (y1 != y2))
     {
         d = (y2 > y1) ? 1 : -1;
 
-        for(int i = y1 + d; i != y2; i += d)
-            if(chess.at(char(x1), i).has_figure())
+        for (int i = y1 + d; i != y2; i += d)
+            if (chess.at(char(x1), i).has_figure())
                 return false;
-        if(change_pos_decider(c2) == false)
+        if (change_pos_decider(c2) == false)
             return false;
     }
-    return true;
+    if (ensure_king_is_safe == false)
+        return true;
+    else
+    {
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            return false;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            return true;
+        }
+    }
 }
 
 VisualSteps* Rook::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -275,7 +310,7 @@ void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, Visu
     }
 }
 
-int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -301,7 +336,22 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
                 return false;
         }
     }
-    return true;
+    if (ensure_king_is_safe == false)
+        return true;
+    else
+    {
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            return false;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            return true;
+        }
+    }
 }
 
 VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -349,7 +399,7 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
     return steps_representation;
 }
 
-int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -378,7 +428,22 @@ int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
     }
     if (change_pos_decider(c2) == false)
         return false;
-    return true;
+    if (ensure_king_is_safe == false)
+        return true;
+    else
+    {
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            return false;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            return true;
+        }
+    }
 }
 
 VisualSteps* Bishop::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -434,7 +499,7 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
     }
 }
 
-int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
+int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -496,7 +561,22 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
         if (change_pos_decider(c2) == false)
             return false;
     }
-    return true;
+    if (ensure_king_is_safe == false)
+        return true;
+    else
+    {
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            return false;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            return true;
+        }
+    }
 }
 
 VisualSteps* Queen::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -620,4 +700,58 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
         x += d1;
         y += d2;
     }
+}
+
+int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
+{
+    int x1 = int(c1.location().x), x2 = int(c2.location().x);
+    int y1 = c1.location().y, y2 = c2.location().y;
+    if (!(abs(x2 - x1) <= 1 && abs(y2 - y1) <= 1) || (x2 == x1 && y1 == y2))
+        return false;
+    if (change_pos_decider(c2) == false)
+        return false;
+    if (ensure_king_is_safe == false)
+        return true;
+    else
+    {
+        c2.attach_figure(c1.detach_figure());
+        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        {
+            c1.attach_figure(c2.detach_figure());
+            return false;
+        }
+        else
+        {
+            c1.attach_figure(c2.detach_figure());
+            return true;
+        }
+    }
+}
+
+VisualSteps* King::show_possible_steps(Coordinate position, Chessboard& chess)
+{
+    // I know it's less effective, but easier to read, maybe should be rewritten
+    VisualSteps* steps_representation = new VisualSteps{chess};
+    for (int i = 0; i < chess.N; i++)
+        for (int j = 1; j <= chess.N; j++)
+        {
+            if (correct_step(chess.at(position.x, position.y), chess.at(i + a_ascii, j), chess))
+            {
+                if (chess.at(i + a_ascii, j).has_figure())
+                {
+                    Frame* tempf = new Frame{chess.at(i + a_ascii, j).center(), chess};
+                    steps_representation->possible_takes.push_back(tempf);
+                    chess.attach(*steps_representation->possible_takes.back());
+                }
+                else
+                {
+                    Circle* tempc = new Circle{chess.at(i + a_ascii, j).center(), c_size / 4};
+                    tempc->set_color(chess_yellow);
+                    tempc->set_fill_color(chess_yellow);
+                    steps_representation->possible_steps.push_back(tempc);
+                    chess.attach(*steps_representation->possible_steps.back());
+                }
+            }
+        }
+    return steps_representation;
 }
