@@ -149,14 +149,5 @@ void Frame::draw_lines() const
 VisualSteps::~VisualSteps()
 {
     for(int i = int(possible_steps.size() - 1); i >= 0; i--)
-    {
-        chess->detach(*possible_steps[i]);
-        delete possible_steps[i];
-        //possible_steps.erase(possible_steps.begin()+i,possible_steps.begin()+i+1);
-    }
-    for(int i = int(possible_takes.size()-1); i >= 0; i--)
-    {
-        delete possible_takes[i];
-        //possible_takes.erase(possible_takes.begin()+i,possible_takes.begin()+i+1);
-    }
+        chess->detach(possible_steps[i]);
 }

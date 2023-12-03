@@ -127,10 +127,10 @@ void Chessboard::clicked(Cell& c)
                     detach(c.detach_figure());            // убираем фигуру врага
                     c.attach_figure(c1.detach_figure());  // переносим свою
                 }
-                else if (1 <= y + b && y + b < 7 && (*this).at(x, y + b).has_figure() && (a == 2 or a == 3))
+                else if (1 <= y + b && y + b < 7 && (*this)[x][y + b].has_figure() && (a == 2 || a == 3))
                 {
-                    detach((*this).at(x, y + b).detach_figure());  // *this = chess
-                    (*this).at(x, y).attach_figure(c1.detach_figure());
+                    detach((*this)[x][y + b].detach_figure());  // *this = chess
+                    (*this)[x][y].attach_figure(c1.detach_figure());
                 }
                 else
                 {

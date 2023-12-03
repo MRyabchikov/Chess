@@ -75,8 +75,8 @@ struct VisualSteps
     VisualSteps(Chessboard& chess_) : chess{&chess_} {}
 
     ~VisualSteps();
-    std::vector<Frame*> possible_takes;
-    std::vector<Graph_lib::Circle*> possible_steps;
+    Vector_ref<Frame> possible_takes;
+    Vector_ref<Circle> possible_steps;
 
   private:
     Chessboard* chess;
