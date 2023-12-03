@@ -37,15 +37,16 @@ void Cell::attach_figure(Figure& ch)
 {
     ch.attach(*this);
     figure = &ch;
+
 }
 
 //removed const and i don't know how it will turn out  
-/*const*/ Figure& Cell::get_figure() const // обязательно нужна проверка не нулевой ли указатель checker                     
+/*const*/ Figure& Cell::get_figure()  // обязательно нужна проверка не нулевой ли указатель checker                     
 { 
     return *figure;
 }
 
-Coordinate Cell::location()
+Coordinate Cell::location() const
 {
 
     int N = 8;       //Couldn't find a way to properly use
