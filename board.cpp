@@ -109,11 +109,7 @@ void Chessboard::clicked(Cell& c)
         if (selected->has_figure())
         {
             int a = selected->get_figure().correct_step(*selected, c, *this);
-<<<<<<< HEAD
             if (a)
-=======
-            if(a)
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
             {
                 // if()
                 //  move_figure
@@ -121,7 +117,6 @@ void Chessboard::clicked(Cell& c)
                 int x = c.location().x, y = c.location().y;
 
                 int b;
-<<<<<<< HEAD
                 if (step_chooser == black)
                     b = 1;
                 else
@@ -141,23 +136,6 @@ void Chessboard::clicked(Cell& c)
                 {
                     c.attach_figure(c1.detach_figure());
                 }
-=======
-                if (step_chooser == black) b = 1;
-                else b = -1;
-                if(c.has_figure())
-                {
-                    //taking the figure from the opponent
-                    detach(c.detach_figure()); // убираем фигуру врага
-                    c.attach_figure(c1.detach_figure()); // переносим свою
-                }
-                else if (1 <= y + b && y + b < 7 && (*this).at(x, y + b).has_figure() && (a == 2 or a == 3)) {
-                    detach((*this).at(x, y + b).detach_figure()); // *this = chess
-                    (*this).at(x, y).attach_figure(c1.detach_figure());
-                }
-                else {
-                    c.attach_figure(c1.detach_figure());
-                }
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
 
                 step_swap();
             }
