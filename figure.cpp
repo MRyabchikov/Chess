@@ -1,16 +1,9 @@
 #include "figure.h"
 #include "board.h"
 #include <algorithm>
-<<<<<<< HEAD
 #include <iostream>
 #include <typeinfo>
 #include <vector>
-=======
-#include <iostream>
-#include <vector>
-#include <iostream>
-#include <typeinfo>
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
 
 using Graph_lib::Circle;
 
@@ -38,7 +31,6 @@ bool Figure::change_pos_decider(Cell& c)
     return true;
 }
 
-<<<<<<< HEAD
 int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int decider;  // Decides whether to move upwards or downwards
@@ -55,27 +47,6 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
     else              // I had to set 'decider' value the old-fashioned way
         decider = -1;
     if (decider == 1)
-=======
-<<<<<<< HEAD
-int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
-{
-    int decider;       //Decides whether to move upwards or downwards
-                       //depending on the color of a figure. 
-                       //Решает, двигаться ли вверх или вниз, в зависимости от цвета фигуры
-
-                       //Decides whether to take the figure or not
-    bool take_decider; //If true, it assumes that it's whites' turn
-                       //else - blacks' turn.
-                       // Решает, брать фигуру или нет, если true, то предполагается, что настала очередь белых,
-                       // в противном случае - очередь черных
-
-    if(is_white())    
-        decider = 1;   //For some reason ternary operator didn't work so
-    else               //I had to set 'decider' value the old-fashioned way
-        decider = -1;  //По какой-то причине тернарный оператор не сработал, поэтому мне пришлось установить значение 'decider' старомодным способом
-
-    if(decider == 1)
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
         take_decider = true;
     else
         take_decider = false;
@@ -84,19 +55,10 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
     int y1 = c1.location().y;
     int x2 = int(c2.location().x);
     int y2 = c2.location().y;
-<<<<<<< HEAD
 
     if (chess[char(x1 - 1)][y1].has_figure() && chess[char(x1 - 1)][y1].get_figure().is_pawn() &&
         chess[char(x1)][y1].get_figure().is_black() != chess[char(x1 - 1)][y1].get_figure().is_black() &&
         chess[char(x1 - 1)][y1].get_figure().double_step0())
-=======
-    
-    if (chess.at(char(x1-1), y1).has_figure() && chess.at(char(x1-1), y1).get_figure().is_pawn() && chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1-1), y1).get_figure().is_black() && chess.at(char(x1-1), y1).get_figure().double_step0()) {
-        return 2;
-    } else if (chess.at(char(x1+1), y1).has_figure() && chess.at(char(x1+1), y1).get_figure().is_pawn() && chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1+1), y1).get_figure().is_black() && chess.at(char(x1+1), y1).get_figure().double_step0()) {
-        return 3;
-    } else if(first_step)
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
     {
         returning_value = 2;
     }
@@ -111,7 +73,6 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
         if (x1 == x2 && ((y2 - y1 == 1 * decider) || (y2 - y1 == 2 * decider)) && !c2.has_figure())
         {
             if (y2 - y1 == 2 * decider)
-<<<<<<< HEAD
                 if (chess[char(x1)][y1 + 1 * decider].has_figure())
                     return 0;
             if (y2 - y1 == 2 * decider && double_step == false)
@@ -128,26 +89,10 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
             returning_value = 1;
         }
         else
-=======
-                if(chess.at(char(x1), y1 + 1 * decider).has_figure())
-                    return 0;
-            if (y2 - y1 == 2 * decider && double_step == false) double_step = 1;
-            first_step = false;
-            return 1;
-        }
-
-        else if((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() && c2.get_figure().is_black() == take_decider)
-        {
-            first_step = false;
-            double_step = false;
-            return 1;
-        } else
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
             return 0;
     }
     else
     {
-<<<<<<< HEAD
         if (x1 == x2 && (y2 - y1 == 1 * decider) && !c2.has_figure())
         {
             double_step = 0;
@@ -160,15 +105,6 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
             returning_value = 1;
         }
         else
-=======
-        if(x1 == x2 && (y2 - y1 == 1 * decider) && !c2.has_figure()) {
-            double_step = 0;
-            return 1;
-        } else if((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() && c2.get_figure().is_black() == take_decider) {
-            double_step = 0;
-            return 1;
-        } else
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
             return 0;
     }
     /*
@@ -234,21 +170,12 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
 
     for (int i = 1; i <= (first_step ? 2 : 1); i++)
     {
-<<<<<<< HEAD
         if (correct_step(chess[x][y], chess[x][y + i * decider], chess))
         {
 
             first_step = first_step_reserved;  // Костыль
 
             Circle* tempc = new Circle{chess[x][y + i * decider].center(), c_size / 4};
-=======
-        if(correct_step(chess.at(x,y),chess.at(x,y + i*decider), chess))
-        {
-
-            first_step = first_step_reserved; //Костыль
-
-            Circle* tempc = new Circle{chess.at(x,y + i*decider).center(), c_size/4};
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
             tempc->set_color(chess_yellow);
             tempc->set_fill_color(chess_yellow);
             steps_representation->possible_steps.push_back(tempc);
@@ -260,7 +187,6 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
     {
         if (!(int(x) + i < a_ascii || int(x) + i > 7 + a_ascii))
         {
-<<<<<<< HEAD
             int a = correct_step(chess[x][y], chess[char(int(x) + i)][y + decider * 1], chess);
             if (a)
             {
@@ -273,17 +199,6 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
                     tempf = new Frame{chess[char(int(x) - 1)][y + decider].center(), chess};
                 if (a == 3)
                     tempf = new Frame{chess[char(int(x) + 1)][y + decider].center(), chess};
-=======
-            int a = correct_step(chess.at(x, y), chess.at(char(int(x) + i), y + decider*1), chess);
-            if(a)
-            {   
-                first_step = first_step_reserved; //Костыль
-
-                Frame* tempf;
-                if (a == 1) tempf = new Frame{chess.at(char(int(x) + i),y + decider).center(), chess};
-                if (a == 2) tempf = new Frame{chess.at(char(int(x) - 1),y + decider).center(), chess};
-                if (a == 3) tempf = new Frame{chess.at(char(int(x) + 1),y + decider).center(), chess};
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
                 steps_representation->possible_takes.push_back(tempf);
                 chess.attach(*steps_representation->possible_takes.back());
                 // delete tempf;
@@ -294,11 +209,7 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
     return steps_representation;
 }
 
-<<<<<<< HEAD
 int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
-=======
-int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess) //Checks if the step is correct
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -400,11 +311,7 @@ void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, Vi
                 }
                 else
                 {
-<<<<<<< HEAD
                     Circle* tempc = new Circle{chess[char(i)][position.y].center(), c_size / 4};
-=======
-                    Circle* tempc = new Circle{chess.at(char(i),position.y).center(), c_size/4};
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
                     tempc->set_color(chess_yellow);
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
@@ -435,32 +342,19 @@ void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, Visu
                 }
                 else
                 {
-<<<<<<< HEAD
                     Circle* tempc = new Circle{chess[position.x][i].center(), c_size / 4};
                     tempc->set_color(chess_yellow);
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
                     chess.attach(*steps_representation->possible_steps.back());
                     // delete tempc;
-=======
-                Circle* tempc = new Circle{chess.at(position.x,i).center(), c_size/4};
-                tempc->set_color(chess_yellow);
-                tempc->set_fill_color(chess_yellow);
-                steps_representation->possible_steps.push_back(tempc);
-                chess.attach(*steps_representation->possible_steps.back());
-                //delete tempc;
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
                 }
             }
         }
     }
 }
 
-<<<<<<< HEAD
 int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
-=======
-int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -557,11 +451,7 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
                 }
                 else
                 {
-<<<<<<< HEAD
                     Circle* tempc = new Circle{chess[pos.x][pos.y].center(), c_size / 4};
-=======
-                    Circle* tempc = new Circle{chess.at(pos.x,pos.y).center(), c_size/4};
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
                     tempc->set_color(chess_yellow);
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
@@ -574,11 +464,7 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
     return steps_representation;
 }
 
-<<<<<<< HEAD
 int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
-=======
-int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -687,11 +573,7 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
             }
             else
             {
-<<<<<<< HEAD
                 Circle* tempc = new Circle{chess[char(x)][y].center(), c_size / 4};
-=======
-                Circle* tempc = new Circle{chess.at(char(x),y).center(), c_size/4};
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
                 tempc->set_color(chess_yellow);
                 tempc->set_fill_color(chess_yellow);
                 steps_representation->possible_steps.push_back(tempc);
@@ -703,11 +585,7 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
     }
 }
 
-<<<<<<< HEAD
 int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
-=======
-int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess)
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
 {
     int x1 = int(c1.location().x);
     int y1 = c1.location().y;
@@ -843,11 +721,7 @@ void Queen::horisontal_possible_steps(Coordinate& position, Chessboard& chess, V
                 }
                 else
                 {
-<<<<<<< HEAD
                     Circle* tempc = new Circle{chess[char(i)][position.y].center(), c_size / 4};
-=======
-                    Circle* tempc = new Circle{chess.at(char(i),position.y).center(), c_size/4};
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
                     tempc->set_color(chess_yellow);
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
@@ -878,21 +752,12 @@ void Queen::vertical_possible_steps(Coordinate& position, Chessboard& chess, Vis
                 }
                 else
                 {
-<<<<<<< HEAD
                     Circle* tempc = new Circle{chess[position.x][i].center(), c_size / 4};
                     tempc->set_color(chess_yellow);
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
                     chess.attach(*steps_representation->possible_steps.back());
                     // delete tempc;
-=======
-                Circle* tempc = new Circle{chess.at(position.x,i).center(), c_size/4};
-                tempc->set_color(chess_yellow);
-                tempc->set_fill_color(chess_yellow);
-                steps_representation->possible_steps.push_back(tempc);
-                chess.attach(*steps_representation->possible_steps.back());
-                //delete tempc;
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
                 }
             }
         }
@@ -932,11 +797,7 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
             }
             else
             {
-<<<<<<< HEAD
                 Circle* tempc = new Circle{chess[char(x)][y].center(), c_size / 4};
-=======
-                Circle* tempc = new Circle{chess.at(char(x),y).center(), c_size/4};
->>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
                 tempc->set_color(chess_yellow);
                 tempc->set_fill_color(chess_yellow);
                 steps_representation->possible_steps.push_back(tempc);
