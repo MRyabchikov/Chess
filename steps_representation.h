@@ -15,6 +15,10 @@ using Graph_lib::Shape;
 struct Chessboard;
 
 constexpr int c_size = 80;  // couldn't find a way to get this constant from "cell.h"
+<<<<<<< HEAD
+=======
+
+>>>>>>> 81e9693851a6fccbb311da8d0eb96c0eb1f550e2
 
 // Shape that represents a circle of circles, that fits into a cell (80*80 pixels)
 // Used when it's needed to highlight a check
