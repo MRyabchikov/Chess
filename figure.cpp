@@ -166,14 +166,14 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
     if (position.y == int(4.5 + 3.5 * decider))  // If pawn has reached the end of the board
         return steps_representation;             // It can't move anymore (for now)
 
-    bool first_step_reserved = first_step;  // Костыль
+    bool first_step_reserved = first_step;       // Костыль
 
     for (int i = 1; i <= (first_step ? 2 : 1); i++)
     {
         if (correct_step(chess[x][y], chess[x][y + i * decider], chess))
         {
 
-            first_step = first_step_reserved;  // Костыль
+            first_step = first_step_reserved;     // Костыль
 
             Circle* tempc = new Circle{chess[x][y + i * decider].center(), c_size / 4};
             tempc->set_color(chess_yellow);
