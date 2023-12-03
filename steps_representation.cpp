@@ -93,15 +93,15 @@ Frame::Frame(Point center, Chessboard& chess_) :
     Rectangle* h_r3 = new Rectangle{{center.x - c_size/2, center.y + c_size/2 - rc_length}, rc_width, rc_length};
     Rectangle* h_r4 = new Rectangle{{center.x + c_size/2 - rc_width, center.y + c_size/2 - rc_length}, rc_width, rc_length};
 
-    h_r1->set_fill_color(Graph_lib::Color::green);
-    h_r2->set_fill_color(Graph_lib::Color::green);
-    h_r3->set_fill_color(Graph_lib::Color::green);
-    h_r4->set_fill_color(Graph_lib::Color::green);
+    h_r1->set_fill_color(chess_yellow);
+    h_r2->set_fill_color(chess_yellow);
+    h_r3->set_fill_color(chess_yellow);
+    h_r4->set_fill_color(chess_yellow);
 
-    h_r1->set_color(Graph_lib::Color::green);
-    h_r2->set_color(Graph_lib::Color::green);
-    h_r3->set_color(Graph_lib::Color::green);
-    h_r4->set_color(Graph_lib::Color::green);
+    h_r1->set_color(chess_yellow);
+    h_r2->set_color(chess_yellow);
+    h_r3->set_color(chess_yellow);
+    h_r4->set_color(chess_yellow);
 
     horisontal_rectangles.push_back(h_r1);
     horisontal_rectangles.push_back(h_r2);
@@ -116,15 +116,15 @@ Frame::Frame(Point center, Chessboard& chess_) :
     Rectangle* v_r3 = new Rectangle{{center.x - c_size/2, center.y + c_size/2 - rc_width}, rc_length, rc_width};
     Rectangle* v_r4 = new Rectangle{{center.x + c_size/2 - rc_length, center.y + c_size/2 - rc_width}, rc_length, rc_width};
 
-    v_r1->set_fill_color(Graph_lib::Color::green);
-    v_r2->set_fill_color(Graph_lib::Color::green);
-    v_r3->set_fill_color(Graph_lib::Color::green);
-    v_r4->set_fill_color(Graph_lib::Color::green);
+    v_r1->set_fill_color(chess_yellow);
+    v_r2->set_fill_color(chess_yellow);
+    v_r3->set_fill_color(chess_yellow);
+    v_r4->set_fill_color(chess_yellow);
 
-    v_r1->set_color(Graph_lib::Color::green);
-    v_r2->set_color(Graph_lib::Color::green);
-    v_r3->set_color(Graph_lib::Color::green);
-    v_r4->set_color(Graph_lib::Color::green);
+    v_r1->set_color(chess_yellow);
+    v_r2->set_color(chess_yellow);
+    v_r3->set_color(chess_yellow);
+    v_r4->set_color(chess_yellow);
 
     vertical_rectangles.push_back(v_r1);
     vertical_rectangles.push_back(v_r2);
@@ -145,7 +145,6 @@ Frame::~Frame()
         horisontal_rectangles.erase(horisontal_rectangles.begin()+i,horisontal_rectangles.begin()+i+1);
         chess->detach(*vertical_rectangles[i]);
         delete vertical_rectangles[i];
-        vertical_rectangles.erase(vertical_rectangles.begin()+i,vertical_rectangles.begin()+i+1);
     }
     chess->detach(*this);
 }
@@ -170,12 +169,12 @@ VisualSteps::~VisualSteps()
     {
         chess->detach(*possible_steps[i]);
         delete possible_steps[i];
-        possible_steps.erase(possible_steps.begin()+i,possible_steps.begin()+i+1);
+        //possible_steps.erase(possible_steps.begin()+i,possible_steps.begin()+i+1);
     }
     for(int i = int(possible_takes.size()-1); i >= 0; i--)
     {
         chess->detach(*possible_takes[i]);
         delete possible_takes[i];
-        possible_takes.erase(possible_takes.begin()+i,possible_takes.begin()+i+1);
+        //possible_takes.erase(possible_takes.begin()+i,possible_takes.begin()+i+1);
     }
 }

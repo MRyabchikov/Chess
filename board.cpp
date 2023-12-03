@@ -1,6 +1,14 @@
 #include "board.h"
+#include "cell.h"
 #include <iostream>
 
+
+Cell& Sub_Vector_ref::operator[](int i)
+{
+    if(i < 1 || i > 8)
+        Graph_lib::error("Out of range");
+    return v[i-1];
+}
 
 MyWindow::MyWindow(Point xy, int w, int h, const std::string& title)
     : Simple_window{xy, w, h, title}, quit_button{Point{x_max() - 70, 20}, 70, 20, "Quit", cb_quit}
@@ -74,7 +82,7 @@ Chessboard::Chessboard(Point xy) : MyWindow{xy, width, height, "Chessboard"}, x_
 }
 
 void Chessboard::clicked(Cell& c)
-{   // для шашек. Для всего остального удалить
+{  // для шашек. Для всего остального удалить
     // if (!c.is_black()) return; для контроля, кто должен ходить
     //  в c также лежит информация о том, стоит ли фигура на это клетке. (предположительно)
     //  если стоит, то has_checker() == true;
@@ -82,10 +90,10 @@ void Chessboard::clicked(Cell& c)
     // std::cout << "1\n";
     if (!selected)
     {
-        //all_possible_steps = nullptr;
+        // all_possible_steps = nullptr;
         selected = &c;
         c.activate();  // подсвечивает
-        if(decide() == false)
+        if (decide() == false)
         {
             c.deactivate();
             selected = nullptr;
@@ -100,20 +108,35 @@ void Chessboard::clicked(Cell& c)
         // std::cout << "3\n";
         if (selected->has_figure())
         {
-            if(selected->get_figure().correct_step(*selected, c, *this))
+            int a = selected->get_figure().correct_step(*selected, c, *this);
+            if (a)
             {
-                //if()
-                // move_figure
+                // if()
+                //  move_figure
                 Cell& c1 = *selected;
-                if(c.has_figure())
+                int x = c.location().x, y = c.location().y;
+
+                int b;
+                if (step_chooser == black)
+                    b = 1;
+                else
+                    b = -1;
+                if (c.has_figure())
                 {
-                    //taking the figure from the opponent
-                    detach(c.detach_figure());
-                    c.attach_figure(c1.detach_figure());
+                    // taking the figure from the opponent
+                    detach(c.detach_figure());            // убираем фигуру врага
+                    c.attach_figure(c1.detach_figure());  // переносим свою
+                }
+                else if (1 <= y + b && y + b < 7 && (*this).at(x, y + b).has_figure() && (a == 2 or a == 3))
+                {
+                    detach((*this).at(x, y + b).detach_figure());  // *this = chess
+                    (*this).at(x, y).attach_figure(c1.detach_figure());
                 }
                 else
+                {
                     c.attach_figure(c1.detach_figure());
-                // std::cout << "4\n";
+                }
+
                 step_swap();
             }
         }
@@ -121,32 +144,43 @@ void Chessboard::clicked(Cell& c)
         selected->deactivate();
 
         // Clear the screen from visual representation of possible moves for the current figure
-        if(all_possible_steps != nullptr)
+        if (all_possible_steps != nullptr)
         {
             delete all_possible_steps;
             all_possible_steps = nullptr;
         }
-       selected = nullptr;
+        selected = nullptr;
     }
     Fl::redraw();
 }
 
 bool Chessboard::decide()
 {
-    if(!selected->has_figure())
+    if (!selected->has_figure())
         return false;
-    if(step_chooser == step_color::white && selected->get_figure().is_black())
+    if (step_chooser == step_color::white && selected->get_figure().is_black())
         return false;
-    else if(step_chooser == step_color::black && selected->get_figure().is_white())
+    else if (step_chooser == step_color::black && selected->get_figure().is_white())
         return false;
     return true;
 }
 
 bool Chessboard::out_of_range(Coordinate pos)
 {
-    if((int(pos.x) < a_ascii) || (int(pos.x) > a_ascii + 7))
+    if ((int(pos.x) < a_ascii) || (int(pos.x) > a_ascii + 7))
         return true;
-    else if((pos.y < 1) || (pos.y > 8))
+    else if ((pos.y < 1) || (pos.y > 8))
         return true;
     return false;
+}
+
+Sub_Vector_ref Chessboard::operator[](char c)
+{
+    if(c < 'a' || c > 'h')
+        Graph_lib::error("Out of range");
+    Graph_lib::Vector_ref<Cell> tempv;
+    for(int i = 1; i <= N; i++)
+        tempv.push_back(at(c, i));
+    Sub_Vector_ref subv{tempv};
+    return subv;
 }

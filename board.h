@@ -10,6 +10,19 @@ using Graph_lib::Point;
 
 const Graph_lib::Point Chessboard_location{200,200};
 
+//Class, that doesn't allow you to shoot yourself in the foot while
+//trying to get a "Cell" value using indices
+class Sub_Vector_ref
+{
+  public:
+    Sub_Vector_ref() = default;
+    Sub_Vector_ref(Graph_lib::Vector_ref<Cell> v_):  v{v_} {}
+
+    Cell& operator[](int i);
+
+  private:
+    Graph_lib::Vector_ref<Cell> v;
+};
 
 class MyWindow : public Simple_window
 {
@@ -40,11 +53,8 @@ struct Chessboard : MyWindow
     static constexpr int N_max = 8;
     static_assert(N <= N_max, "do not allow board larger than N_max*N_max");
 
-    Cell& at(char c, int i) {
-        i--;
-        int j = c - 'a';
-        return cells[i*N + j];
-    }
+    //return a 1D array of values of a column of a 'c' coordinate
+    Sub_Vector_ref operator[](char c);
 
     //friend VisualSteps* Figure::show_possible_steps(Coordinate position, Chessboard& chess);
 
@@ -64,6 +74,13 @@ struct Chessboard : MyWindow
     {
         auto& btn = Graph_lib::reference_to<Cell>(widget);
         dynamic_cast<Chessboard&>(btn.window()).clicked(btn);
+    }
+
+    Cell& at(char c, int i)
+    {
+        i--;
+        int j = c - 'a';
+        return cells[i*N + j];
     }
 
     void clicked (Cell& c);
