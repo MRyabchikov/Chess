@@ -31,6 +31,14 @@ bool Figure::change_pos_decider(Cell& c)
     return true;
 }
 
+void Pawn::reset_double_step ()
+{
+    if(steps_till_reset == 0)
+        double_step = 0;
+    else
+        steps_till_reset--;
+}
+
 int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
     int decider;  // Decides whether to move upwards or downwards
@@ -78,7 +86,10 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                 if (chess[char(x1)][y1 + 1 * decider].has_figure())
                     return 0;
             if (y2 - y1 == 2 * decider && double_step == false)
+            {
                 double_step = 1;
+                steps_till_reset = 1;
+            }
             first_step = false;
             returning_value = 1;
         }

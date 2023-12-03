@@ -89,6 +89,8 @@ struct Chessboard : MyWindow
 
     void step_swap() {step_chooser = (step_chooser == step_color::white) ? step_color::black : step_color::white;}
 
+    void reset_double_steps();
+
     Graph_lib::Marks x_labels;
     Graph_lib::Marks y_labels;
 

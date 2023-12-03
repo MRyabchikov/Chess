@@ -138,6 +138,7 @@ void Chessboard::clicked(Cell& c)
                 }
 
                 step_swap();
+                reset_double_steps();
             }
         }
 
@@ -163,6 +164,13 @@ bool Chessboard::decide()
     else if (step_chooser == step_color::black && selected->get_figure().is_white())
         return false;
     return true;
+}
+
+void Chessboard::reset_double_steps()
+{
+    for(int i = 0; i < cells.size(); i++)
+        if(cells[i].has_figure() && cells[i].get_figure().is_pawn())
+            cells[i].get_figure().reset_double_step();
 }
 
 bool Chessboard::out_of_range(Coordinate pos)
