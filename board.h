@@ -6,7 +6,7 @@
 
 using Graph_lib::Address;
 using Graph_lib::Point;
-
+using Graph_lib::Vector_ref;
 
 const Graph_lib::Point Chessboard_location{200,200};
 
@@ -49,12 +49,17 @@ struct Chessboard : MyWindow
 
     Chessboard(Point xy);
 
+    void standard_fill();
+
     static constexpr int N = 8;
     static constexpr int N_max = 8;
     static_assert(N <= N_max, "do not allow board larger than N_max*N_max");
 
     //return a 1D array of values of a column of a 'c' coordinate
     Sub_Vector_ref operator[](char c);
+
+    //says for itself
+    Chessboard deepcopy();
 
     //friend VisualSteps* Figure::show_possible_steps(Coordinate position, Chessboard& chess);
 
@@ -68,7 +73,17 @@ struct Chessboard : MyWindow
 
     step_color step_chooser;
 
-    Graph_lib::Vector_ref<Cell> cells;
+    Vector_ref<Cell> cells;
+
+    //these are made so they don't get out of scope
+    Vector_ref<Pawn> pawns;
+    Vector_ref<Rook> rooks;
+    Vector_ref<Knight> knights;
+    Vector_ref<Bishop> bishops;
+    Vector_ref<Queen> queens;
+    Vector_ref<King> kings;
+
+
 
     static void cb_clicked (Address, Address widget)
     {

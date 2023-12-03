@@ -6,7 +6,7 @@
 Cell& Sub_Vector_ref::operator[](int i)
 {
     if(i < 1 || i > 8)
-        Graph_lib::error("Out of range");
+        Graph_lib::error("Out of range: vertical");
     return v[i-1];
 }
 
@@ -79,6 +79,114 @@ Chessboard::Chessboard(Point xy) : MyWindow{xy, width, height, "Chessboard"}, x_
     all_possible_steps = nullptr;
 
     step_chooser = step_color::white;
+}
+
+void Chessboard::standard_fill()
+{
+    // белые пешки
+    for(int i = 0; i < 8; i++)
+    {
+        Pawn* temp_pawn = new Pawn(*this, Figure::Type::white);
+        pawns.push_back(temp_pawn);
+        at(char(a_ascii+i),2).attach_figure(pawns[i]);
+    }
+
+    // чёрные пешки
+    for(int i = 8; i < 16; i++)
+    {
+        Pawn* temp_pawn = new Pawn(*this, Figure::Type::black);
+        pawns.push_back(temp_pawn);
+        at(char(a_ascii+i%8),7).attach_figure(pawns[i]);
+    }
+
+
+    // белые кони
+    Knight* wn0 = new Knight{*this, Figure::Type::white};
+    Knight* wn1 = new Knight{*this, Figure::Type::white};
+
+    knights.push_back(wn0);
+    knights.push_back(wn1);
+
+    at('b',1).attach_figure(knights[0]);
+    at('g',1).attach_figure(knights[1]);
+
+    // черыне кони
+    Knight* bn0 = new Knight{*this, Figure::Type::black};
+    Knight* bn1 = new Knight{*this, Figure::Type::black};
+
+    knights.push_back(bn0);
+    knights.push_back(bn1);
+
+    at('b',8).attach_figure(knights[2]);
+    at('g',8).attach_figure(knights[3]);
+
+    // белые слоны
+    Bishop* wb0 = new Bishop{*this, Figure::Type::white};
+    Bishop* wb1 = new Bishop{*this, Figure::Type::white};
+
+    bishops.push_back(wb0);
+    bishops.push_back(wb1);
+
+    at('c',1).attach_figure(bishops[0]);
+    at('f',1).attach_figure(bishops[1]);
+
+    // черные слоны
+    Bishop* bb0 = new Bishop{*this, Figure::Type::black};
+    Bishop* bb1 = new Bishop{*this, Figure::Type::black};
+
+    bishops.push_back(bb0);
+    bishops.push_back(bb1);
+
+    at('c',8).attach_figure(bishops[2]);
+    at('f',8).attach_figure(bishops[3]);
+
+    // белые ладьи
+    Rook* wr0 = new Rook{*this, Figure::Type::white};
+    Rook* wr1 = new Rook{*this, Figure::Type::white};
+
+    rooks.push_back(wr0);
+    rooks.push_back(wr1);
+
+    at('a',1).attach_figure(rooks[0]);
+    at('h',1).attach_figure(rooks[1]);
+
+    // черные ладьи
+    Rook* br0 = new Rook{*this, Figure::Type::black};
+    Rook* br1 = new Rook{*this, Figure::Type::black};
+
+    rooks.push_back(br0);
+    rooks.push_back(br1);
+
+    at('a',8).attach_figure(rooks[2]);
+    at('h',8).attach_figure(rooks[3]);
+
+    // Белый король
+    King* wk = new King{*this, Figure::Type::white};
+
+    kings.push_back(wk);
+
+    at('e',1).attach_figure(kings[0]);
+
+    // Черный король
+    King* bk = new King{*this, Figure::Type::black};
+
+    kings.push_back(bk);
+
+    at('e',8).attach_figure(kings[1]);
+
+    // Белый ферзь
+    Queen* wq = new Queen{*this, Figure::Type::white};
+
+    queens.push_back(wq);
+
+    at('d',1).attach_figure(queens[0]);
+
+    // Черный ферзь
+    Queen* bq = new Queen{*this, Figure::Type::black};
+
+    queens.push_back(bq);
+
+    at('d',8).attach_figure(queens[1]);
 }
 
 void Chessboard::clicked(Cell& c)
@@ -185,10 +293,15 @@ bool Chessboard::out_of_range(Coordinate pos)
 Sub_Vector_ref Chessboard::operator[](char c)
 {
     if(c < 'a' || c > 'h')
-        Graph_lib::error("Out of range");
+        Graph_lib::error("Out of range: horisontal");
     Graph_lib::Vector_ref<Cell> tempv;
     for(int i = 1; i <= N; i++)
         tempv.push_back(at(c, i));
     Sub_Vector_ref subv{tempv};
     return subv;
+}
+
+Chessboard Chessboard::deepcopy()
+{
+    Chessboard chess(Chessboard_location);
 }
