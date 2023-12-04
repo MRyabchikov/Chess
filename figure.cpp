@@ -19,12 +19,9 @@ bool King_is_under_attack (Chessboard& chess, bool is_white)
         throw std::runtime_error("No king!");
     for (int i = 0; i < chess.N; i++)
         for (int j = 1; j <= chess.N; j++)
-            if (chess.at(i + a_ascii, j).has_figure() &&
+            if (chess.at(i + a_ascii, j).has_figure() && chess.at(i + a_ascii, j).get_figure().is_white() != is_white &&
                 chess.at(i + a_ascii, j).get_figure().can_take_king(chess, *king_ptr))
-            {
-                std::cout << char(i + a_ascii) << j << std::endl;
                 return true;
-            }
     return false;
 }
 
@@ -143,6 +140,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         c2.attach_figure(c1.detach_figure());
         if (King_is_under_attack(chess, c2.get_figure().is_white()))
         {
+            std::cout << c2.location().x << " " << c2.location().y << c2.get_figure().is_white() << " " << std::endl;
             c1.attach_figure(c2.detach_figure());
             if (has_deleted_figure)
             {
@@ -375,7 +373,7 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
     int x2 = int(c2.location().x);
     int y2 = c2.location().y;
 
-    if (!(std::abs(x2 - x1) == 1 || std::abs(x2 - x1) == 2) || !(std::abs(y2 - y1) == 1 || std::abs(y2 - y1) == 2))
+    if (!((std::abs(x2 - x1) == 1 && std::abs(y2 - y1) == 2) || (std::abs(y2 - y1) == 1 && std::abs(x2 - x1) == 2)))
         return false;
 
     if ((std::abs(x2 - x1) == 1) && (std::abs(y2 - y1) == 2))
@@ -438,40 +436,33 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
     int x = int(position.x);
     int y = position.y;
 
-    std::vector<Coordinate> potential_steps;
-
-    for (int i = -1; i <= 1; i += 2)
-        for (int j = -2; j <= 2; j += 4)
-            potential_steps.push_back(Coordinate{char(x + i), y + j});
-    for (int i = -2; i <= 2; i += 4)
-        for (int j = -1; j <= 1; j += 2)
-            potential_steps.push_back(Coordinate{char(x + i), y + j});
-
-    for (const Coordinate& pos : potential_steps)
-    {
-        if (!chess.out_of_range(pos))
+    for (int i = 0; i < chess.N; i++)
+        for (int j = 1; j <= chess.N; j++)
         {
-            if (correct_step(chess.at(char(x), y), chess.at(pos.x, pos.y), chess))
+            Coordinate pos = Coordinate(i + a_ascii, j);
+            if (!chess.out_of_range(pos))
             {
-                if (chess.at(pos.x, pos.y).has_figure())
+                if (correct_step(chess.at(char(x), y), chess.at(pos.x, pos.y), chess))
                 {
-                    Frame* tempf = new Frame{chess.at(pos.x, pos.y).center(), chess};
-                    steps_representation->possible_takes.push_back(tempf);
-                    chess.attach(*steps_representation->possible_takes.back());
-                    // delete tempf;
-                }
-                else
-                {
-                    Circle* tempc = new Circle{chess.at(pos.x, pos.y).center(), c_size / 4};
-                    tempc->set_color(chess_yellow);
-                    tempc->set_fill_color(chess_yellow);
-                    steps_representation->possible_steps.push_back(tempc);
-                    chess.attach(*steps_representation->possible_steps.back());
-                    // delete tempc;
+                    if (chess.at(pos.x, pos.y).has_figure())
+                    {
+                        Frame* tempf = new Frame{chess.at(pos.x, pos.y).center(), chess};
+                        steps_representation->possible_takes.push_back(tempf);
+                        chess.attach(*steps_representation->possible_takes.back());
+                        // delete tempf;
+                    }
+                    else
+                    {
+                        Circle* tempc = new Circle{chess.at(pos.x, pos.y).center(), c_size / 4};
+                        tempc->set_color(chess_yellow);
+                        tempc->set_fill_color(chess_yellow);
+                        steps_representation->possible_steps.push_back(tempc);
+                        chess.attach(*steps_representation->possible_steps.back());
+                        // delete tempc;
+                    }
                 }
             }
         }
-    }
     return steps_representation;
 }
 
