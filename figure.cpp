@@ -7,6 +7,27 @@
 
 using Graph_lib::Circle;
 
+bool King_is_under_attack (Chessboard& chess, bool is_white)
+{
+    Cell* king_ptr = nullptr;
+    for (int i = 0; i < chess.N; i++)
+        for (int j = 1; j <= chess.N; j++)
+            if (chess.at(i + a_ascii, j).has_figure() && chess.at(i + a_ascii, j).get_figure().is_king() &&
+                chess.at(i + a_ascii, j).get_figure().is_white() == is_white)
+                king_ptr = &(chess.at(i + a_ascii, j));
+    if (king_ptr == nullptr)
+        throw std::runtime_error("No king!");
+    for (int i = 0; i < chess.N; i++)
+        for (int j = 1; j <= chess.N; j++)
+            if (chess.at(i + a_ascii, j).has_figure() &&
+                chess.at(i + a_ascii, j).get_figure().can_take_king(chess, *king_ptr))
+            {
+                std::cout << char(i + a_ascii) << j << std::endl;
+                return true;
+            }
+    return false;
+}
+
 void Figure::attach(const Cell& c)
 {
     move(c.center().x - point(0).x - 40, c.center().y - point(0).y - 45);

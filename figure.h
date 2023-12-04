@@ -67,7 +67,7 @@ struct Figure : Graph_lib::Image
     const Cell* cell{nullptr};
 };
 
-bool King_is_under_attack (Chessboard& chess, bool is_white) { return false; }
+bool King_is_under_attack (Chessboard& chess, bool is_white);
 
 struct Pawn : Figure
 {
