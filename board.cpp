@@ -301,7 +301,100 @@ Sub_Vector_ref Chessboard::operator[](char c)
     return subv;
 }
 
-Chessboard Chessboard::deepcopy()
+Chessboard* Chessboard::deepcopy()
 {
-    Chessboard chess(Chessboard_location);
+    Chessboard* chess = new Chessboard{Chessboard_location};
+
+    //copying pawns
+    for(int i = 0; i < pawns.size(); i++)
+    {
+        Pawn* temp_pawn = pawns[i].deepcopy(*chess);
+        chess->pawns.push_back(temp_pawn);
+
+        if(pawns[i].has_cell())
+        {
+            char tx = pawns[i].get_cell()->location().x;
+            int ty = pawns[i].get_cell()->location().y;
+            (*chess)[tx][ty].attach_figure(chess->pawns[chess->pawns.size()-1]);
+        }
+        else
+            chess->detach(chess->pawns[chess->pawns.size()-1]);
+    }
+    //copying kings
+    for(int i = 0; i < kings.size(); i++)
+    {
+        King* temp_king = kings[i].deepcopy(*chess);
+        chess->kings.push_back(temp_king);
+
+        if(kings[i].has_cell())
+        {
+            char tx = kings[i].get_cell()->location().x;
+            int ty = kings[i].get_cell()->location().y;
+            (*chess)[tx][ty].attach_figure(chess->kings[chess->kings.size()-1]);
+        }
+        else
+            chess->detach(chess->kings[chess->kings.size()-1]);
+    }
+    //copying bishops
+    for(int i = 0; i < bishops.size(); i++)
+    {
+        Bishop* temp_bishop = bishops[i].deepcopy(*chess);
+        chess->bishops.push_back(temp_bishop);
+
+        if(bishops[i].has_cell())
+        {
+            char tx = bishops[i].get_cell()->location().x;
+            int ty = bishops[i].get_cell()->location().y;
+            (*chess)[tx][ty].attach_figure(chess->bishops[chess->bishops.size()-1]);
+        }
+        else
+            chess->detach(chess->bishops[chess->bishops.size()-1]);
+    }
+    //copying knights
+    for(int i = 0; i < knights.size(); i++)
+    {
+        Knight* temp_knight = knights[i].deepcopy(*chess);
+        chess->knights.push_back(temp_knight);
+
+        if(knights[i].has_cell())
+        {
+            char tx = knights[i].get_cell()->location().x;
+            int ty = knights[i].get_cell()->location().y;
+            (*chess)[tx][ty].attach_figure(chess->knights[chess->knights.size()-1]);
+        }
+        else
+            chess->detach(chess->knights[chess->knights.size()-1]);
+    }
+    //copying queens
+    for(int i = 0; i < queens.size(); i++)
+    {
+        Queen* temp_queen = queens[i].deepcopy(*chess);
+        chess->queens.push_back(temp_queen);
+
+        if(queens[i].has_cell())
+        {
+            char tx = queens[i].get_cell()->location().x;
+            int ty = queens[i].get_cell()->location().y;
+            (*chess)[tx][ty].attach_figure(chess->queens[chess->queens.size()-1]);
+        }
+        else
+            chess->detach(chess->queens[chess->queens.size()-1]);
+    }
+    //copying rooks
+    for(int i = 0; i < rooks.size(); i++)
+    {
+        Rook* temp_rook = rooks[i].deepcopy(*chess);
+        chess->rooks.push_back(temp_rook);
+
+        if(rooks[i].has_cell())
+        {
+            char tx = rooks[i].get_cell()->location().x;
+            int ty = rooks[i].get_cell()->location().y;
+            (*chess)[tx][ty].attach_figure(chess->rooks[chess->rooks.size()-1]);
+        }
+        else
+            chess->detach(chess->rooks[chess->rooks.size()-1]);
+    }
+    
+    return chess;
 }

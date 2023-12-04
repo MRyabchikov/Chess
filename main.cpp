@@ -8,9 +8,11 @@ extern const Graph_lib::Point Chessboard_location;
 
 int main ()
 {
-    Chessboard chess(Chessboard_location);
+    Chessboard chess{Chessboard_location};
     chess.standard_fill();
     chess.wait_for_button();
+
+    std::cout << "test";
 
     return 0;
 }

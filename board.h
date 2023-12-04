@@ -59,7 +59,8 @@ struct Chessboard : MyWindow
     Sub_Vector_ref operator[](char c);
 
     //says for itself
-    Chessboard deepcopy();
+    Chessboard* deepcopy();
+    //friend Chessboard* Chessboard::deepcopy();
 
     //friend VisualSteps* Figure::show_possible_steps(Coordinate position, Chessboard& chess);
 
