@@ -7,9 +7,7 @@
 using Graph_lib::Address;
 using Graph_lib::Point;
 
-
-const Graph_lib::Point Chessboard_location{200,200};
-
+const Graph_lib::Point Chessboard_location{200, 200};
 
 class MyWindow : public Simple_window
 {
@@ -30,8 +28,8 @@ struct Chessboard : MyWindow
 
     enum step_color
     {
-      white,
-      black
+        white,
+        black
     };
 
     Chessboard(Point xy);
@@ -40,18 +38,20 @@ struct Chessboard : MyWindow
     static constexpr int N_max = 8;
     static_assert(N <= N_max, "do not allow board larger than N_max*N_max");
 
-    Cell& at(char c, int i) {
+    Cell& at (char c, int i)
+    {
         i--;
         int j = c - 'a';
-        return cells[i*N + j];
+        return cells[i * N + j];
     }
 
-    //friend VisualSteps* Figure::show_possible_steps(Coordinate position, Chessboard& chess);
+    // friend VisualSteps* Figure::show_possible_steps(Coordinate position, Chessboard& chess);
 
-    bool out_of_range(Coordinate pos);
+    bool out_of_range (Coordinate pos);
+
+    bool is_stalemate (step_color stalemate_candidate) { return true; }
 
   private:
-
     static constexpr int margin = 30;
     static constexpr int width = N * Cell::size + 2 * margin + 70;
     static constexpr int height = N * Cell::size + 2 * margin;
@@ -68,9 +68,9 @@ struct Chessboard : MyWindow
 
     void clicked (Cell& c);
 
-    bool decide();
+    bool decide ();
 
-    void step_swap() {step_chooser = (step_chooser == step_color::white) ? step_color::black : step_color::white;}
+    void step_swap () { step_chooser = (step_chooser == step_color::white) ? step_color::black : step_color::white; }
 
     Graph_lib::Marks x_labels;
     Graph_lib::Marks y_labels;
