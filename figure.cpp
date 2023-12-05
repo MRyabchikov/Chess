@@ -12,15 +12,15 @@ bool King_is_under_attack (Chessboard& chess, bool is_white)
     Cell* king_ptr = nullptr;
     for (int i = 0; i < chess.N; i++)
         for (int j = 1; j <= chess.N; j++)
-            if (chess.at(i + a_ascii, j).has_figure() && chess.at(i + a_ascii, j).get_figure().is_king() &&
-                chess.at(i + a_ascii, j).get_figure().is_white() == is_white)
-                king_ptr = &(chess.at(i + a_ascii, j));
+            if (chess[i + a_ascii][j].has_figure() && chess[i + a_ascii][j].get_figure().is_king() &&
+                chess[i + a_ascii][j].get_figure().is_white() == is_white)
+                king_ptr = &(chess[i + a_ascii][j]);
     if (king_ptr == nullptr)
         throw std::runtime_error("No king!");
     for (int i = 0; i < chess.N; i++)
         for (int j = 1; j <= chess.N; j++)
-            if (chess.at(i + a_ascii, j).has_figure() && chess.at(i + a_ascii, j).get_figure().is_white() != is_white &&
-                chess.at(i + a_ascii, j).get_figure().can_take_king(chess, *king_ptr))
+            if (chess[i + a_ascii][j].has_figure() && chess[i + a_ascii][j].get_figure().is_white() != is_white &&
+                chess[i + a_ascii][j].get_figure().can_take_king(chess, *king_ptr))
                 return true;
     return false;
 }
@@ -49,9 +49,9 @@ bool Figure::change_pos_decider(Cell& c)
     return true;
 }
 
-void Pawn::reset_double_step ()
+void Pawn::reset_double_step()
 {
-    if(steps_till_reset == 0)
+    if (steps_till_reset == 0)
         double_step = 0;
     else
         steps_till_reset--;
@@ -82,26 +82,17 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
     int x2 = int(c2.location().x);
     int y2 = c2.location().y;
 
-    if ((a_ascii <= x1 - 1 && x1 - 1 <= a_ascii + 7) &&
-        chess[char(x1 - 1)][y1].has_figure() && chess[char(x1 - 1)][y1].get_figure().is_pawn() &&
+    if ((a_ascii <= x1 - 1 && x1 - 1 <= a_ascii + 7) && chess[char(x1 - 1)][y1].has_figure() &&
+        chess[char(x1 - 1)][y1].get_figure().is_pawn() &&
         chess[char(x1)][y1].get_figure().is_black() != chess[char(x1 - 1)][y1].get_figure().is_black() &&
         chess[char(x1 - 1)][y1].get_figure().double_step0() && (x2 == x1 - 1) && (y2 == y1 + decider))
     {
         returning_value = 2;
     }
-    else if ((a_ascii <= x1 + 1 && x1 + 1 <= a_ascii + 7) &&
-             chess[char(x1 + 1)][y1].has_figure() && chess[char(x1 + 1)][y1].get_figure().is_pawn() &&
+    else if ((a_ascii <= x1 + 1 && x1 + 1 <= a_ascii + 7) && chess[char(x1 + 1)][y1].has_figure() &&
+             chess[char(x1 + 1)][y1].get_figure().is_pawn() &&
              chess[char(x1)][y1].get_figure().is_black() != chess[char(x1 + 1)][y1].get_figure().is_black() &&
              chess[char(x1 + 1)][y1].get_figure().double_step0() && (x2 == x1 + 1) && (y2 == y1 + decider))
-    if (chess.at(char(x1 - 1), y1).has_figure() && chess.at(char(x1 - 1), y1).get_figure().is_pawn() &&
-        chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1 - 1), y1).get_figure().is_black() &&
-        chess.at(char(x1 - 1), y1).get_figure().double_step0())
-    {
-        returning_value = 2;
-    }
-    else if (chess.at(char(x1 + 1), y1).has_figure() && chess.at(char(x1 + 1), y1).get_figure().is_pawn() &&
-             chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1 + 1), y1).get_figure().is_black() &&
-             chess.at(char(x1 + 1), y1).get_figure().double_step0())
     {
         returning_value = 3;
     }
@@ -110,8 +101,8 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         if (x1 == x2 && ((y2 - y1 == 1 * decider) || (y2 - y1 == 2 * decider)) && !c2.has_figure())
         {
             if (y2 - y1 == 2 * decider)
-              first_step = false;
-        returning_value = 1;
+                first_step = false;
+            returning_value = 1;
         }
 
         else if ((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() &&
@@ -194,21 +185,21 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
     if (position.y == int(4.5 + 3.5 * decider))  // If pawn has reached the end of the board
         return steps_representation;             // It can't move anymore (for now)
 
-    bool first_step_reserved = first_step;       // Костыль
+    bool first_step_reserved = first_step;  // Костыль
 
     for (int i = 1; i <= (first_step ? 2 : 1); i++)
     {
         if (correct_step(chess[x][y], chess[x][y + i * decider], chess))
         {
 
-            first_step = first_step_reserved;     // Костыль
+            first_step = first_step_reserved;  // Костыль
 
             Circle* tempc = new Circle{chess[x][y + i * decider].center(), c_size / 4};
             tempc->set_color(chess_yellow);
             tempc->set_fill_color(chess_yellow);
             steps_representation->possible_steps.push_back(tempc);
             int sz = steps_representation->possible_steps.size();
-            chess.attach(steps_representation->possible_steps[sz-1]);
+            chess.attach(steps_representation->possible_steps[sz - 1]);
         }
     }
     for (int i = -1; i <= 1; i += 2)
@@ -229,7 +220,7 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
                     tempf = new Frame{chess[char(int(x) + 1)][y + decider].center(), chess};
                 steps_representation->possible_takes.push_back(tempf);
                 int sz = steps_representation->possible_takes.size();
-                chess.attach(steps_representation->possible_takes[sz-1]);
+                chess.attach(steps_representation->possible_takes[sz - 1]);
                 // delete tempf;
             }
         }
@@ -331,7 +322,7 @@ void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, Vi
                     Frame* tempf = new Frame{chess[char(i)][position.y].center(), chess};
                     steps_representation->possible_takes.push_back(tempf);
                     int sz = steps_representation->possible_takes.size();
-                    chess.attach(steps_representation->possible_takes[sz-1]);
+                    chess.attach(steps_representation->possible_takes[sz - 1]);
                     // delete tempf;
                     break;
                 }
@@ -342,7 +333,7 @@ void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, Vi
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
                     int sz = steps_representation->possible_steps.size();
-                    chess.attach(steps_representation->possible_steps[sz-1]);
+                    chess.attach(steps_representation->possible_steps[sz - 1]);
                     // delete tempc;
                 }
             }
@@ -364,7 +355,7 @@ void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, Visu
                     Frame* tempf = new Frame{chess[position.x][i].center(), chess};
                     steps_representation->possible_takes.push_back(tempf);
                     int sz = steps_representation->possible_takes.size();
-                    chess.attach(steps_representation->possible_takes[sz-1]);
+                    chess.attach(steps_representation->possible_takes[sz - 1]);
                     // delete tempf;
                     break;
                 }
@@ -375,7 +366,7 @@ void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, Visu
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
                     int sz = steps_representation->possible_steps.size();
-                    chess.attach(steps_representation->possible_steps[sz-1]);
+                    chess.attach(steps_representation->possible_steps[sz - 1]);
                     // delete tempc;
                 }
             }
@@ -473,7 +464,7 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
                     Frame* tempf = new Frame{chess[pos.x][pos.y].center(), chess};
                     steps_representation->possible_takes.push_back(tempf);
                     int sz = steps_representation->possible_takes.size();
-                    chess.attach(steps_representation->possible_takes[sz-1]);
+                    chess.attach(steps_representation->possible_takes[sz - 1]);
                     // delete tempf;
                 }
                 else
@@ -483,12 +474,13 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
                     int sz = steps_representation->possible_steps.size();
-                    chess.attach(steps_representation->possible_steps[sz-1]);
+                    chess.attach(steps_representation->possible_steps[sz - 1]);
                     // delete tempc;
                 }
             }
         }
-    return steps_representation;
+        return steps_representation;
+    }
 }
 
 int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
@@ -593,7 +585,7 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
                 Frame* tempf = new Frame{chess[char(x)][y].center(), chess};
                 steps_representation->possible_takes.push_back(tempf);
                 int sz = steps_representation->possible_takes.size();
-                chess.attach(steps_representation->possible_takes[sz-1]);
+                chess.attach(steps_representation->possible_takes[sz - 1]);
                 // delete tempf;
                 break;
             }
@@ -604,7 +596,7 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
                 tempc->set_fill_color(chess_yellow);
                 steps_representation->possible_steps.push_back(tempc);
                 int sz = steps_representation->possible_steps.size();
-                chess.attach(steps_representation->possible_steps[sz-1]);
+                chess.attach(steps_representation->possible_steps[sz - 1]);
             }
         }
         x += d1;
@@ -741,7 +733,7 @@ void Queen::horisontal_possible_steps(Coordinate& position, Chessboard& chess, V
                     Frame* tempf = new Frame{chess[char(i)][position.y].center(), chess};
                     steps_representation->possible_takes.push_back(tempf);
                     int sz = steps_representation->possible_takes.size();
-                    chess.attach(steps_representation->possible_takes[sz-1]);
+                    chess.attach(steps_representation->possible_takes[sz - 1]);
                     // delete tempf;
                     break;
                 }
@@ -752,7 +744,7 @@ void Queen::horisontal_possible_steps(Coordinate& position, Chessboard& chess, V
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
                     int sz = steps_representation->possible_steps.size();
-                    chess.attach(steps_representation->possible_steps[sz-1]);
+                    chess.attach(steps_representation->possible_steps[sz - 1]);
                     // delete tempc;
                 }
             }
@@ -774,7 +766,7 @@ void Queen::vertical_possible_steps(Coordinate& position, Chessboard& chess, Vis
                     Frame* tempf = new Frame{chess[position.x][i].center(), chess};
                     steps_representation->possible_takes.push_back(tempf);
                     int sz = steps_representation->possible_takes.size();
-                    chess.attach(steps_representation->possible_takes[sz-1]);
+                    chess.attach(steps_representation->possible_takes[sz - 1]);
                     // delete tempf;
                     break;
                 }
@@ -785,7 +777,7 @@ void Queen::vertical_possible_steps(Coordinate& position, Chessboard& chess, Vis
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
                     int sz = steps_representation->possible_steps.size();
-                    chess.attach(steps_representation->possible_steps[sz-1]);
+                    chess.attach(steps_representation->possible_steps[sz - 1]);
                     // delete tempc;
                 }
             }
@@ -821,7 +813,7 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
                 Frame* tempf = new Frame{chess[char(x)][y].center(), chess};
                 steps_representation->possible_takes.push_back(tempf);
                 int sz = steps_representation->possible_takes.size();
-                chess.attach(steps_representation->possible_takes[sz-1]);
+                chess.attach(steps_representation->possible_takes[sz - 1]);
                 // delete tempf;
                 break;
             }
@@ -832,7 +824,7 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
                 tempc->set_fill_color(chess_yellow);
                 steps_representation->possible_steps.push_back(tempc);
                 int sz = steps_representation->possible_steps.size();
-                chess.attach(steps_representation->possible_steps[sz-1]);
+                chess.attach(steps_representation->possible_steps[sz - 1]);
             }
         }
         x += d1;
@@ -899,7 +891,7 @@ VisualSteps* King::show_possible_steps(Coordinate position, Chessboard& chess)
                     Frame* tempf = new Frame{chess[i + a_ascii][j].center(), chess};
                     steps_representation->possible_takes.push_back(tempf);
                     int sz = steps_representation->possible_takes.size();
-                    chess.attach(steps_representation->possible_takes[sz-1]);
+                    chess.attach(steps_representation->possible_takes[sz - 1]);
                 }
                 else
                 {
@@ -908,13 +900,12 @@ VisualSteps* King::show_possible_steps(Coordinate position, Chessboard& chess)
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
                     int sz = steps_representation->possible_steps.size();
-                    chess.attach(steps_representation->possible_steps[sz-1]);
+                    chess.attach(steps_representation->possible_steps[sz - 1]);
                 }
             }
         }
     return steps_representation;
 }
-
 
 //***********************************DEEP COPIES***********************************//
 
