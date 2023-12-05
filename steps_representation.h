@@ -6,6 +6,7 @@
 #include <vector>
 // #include "board.h"
 
+using Graph_lib::Vector_ref;
 using Graph_lib::Circle;
 using Graph_lib::Closed_polyline;
 using Graph_lib::Point;
@@ -63,7 +64,6 @@ struct Frame : Rectangle
     static constexpr int rc_length = 30;
 
     Chessboard* chess;
-
     std::vector<Rectangle*> horisontal_rectangles;  // Please check for
     std::vector<Rectangle*> vertical_rectangles;    // possible memory leaks
 };
@@ -74,8 +74,8 @@ struct VisualSteps
     VisualSteps(Chessboard& chess_) : chess{&chess_} {}
 
     ~VisualSteps();
-    std::vector<Frame*> possible_takes;
-    std::vector<Graph_lib::Circle*> possible_steps;
+    Vector_ref<Frame> possible_takes;
+    Vector_ref<Circle> possible_steps;
 
   private:
     Chessboard* chess;

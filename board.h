@@ -6,8 +6,23 @@
 
 using Graph_lib::Address;
 using Graph_lib::Point;
+using Graph_lib::Vector_ref;
 
-const Graph_lib::Point Chessboard_location{200, 200};
+const Graph_lib::Point Chessboard_location{200,200};
+
+//Class, that doesn't allow you to shoot yourself in the foot while
+//trying to get a "Cell" value using indices
+class Sub_Vector_ref
+{
+  public:
+    Sub_Vector_ref() = default;
+    Sub_Vector_ref(Graph_lib::Vector_ref<Cell> v_):  v{v_} {}
+
+    Cell& operator[](int i);
+
+  private:
+    Graph_lib::Vector_ref<Cell> v;
+};
 
 class MyWindow : public Simple_window
 {
@@ -34,16 +49,17 @@ struct Chessboard : MyWindow
 
     Chessboard(Point xy);
 
+    void standard_fill();
+
     static constexpr int N = 8;
     static constexpr int N_max = 8;
     static_assert(N <= N_max, "do not allow board larger than N_max*N_max");
+    //return a 1D array of values of a column of a 'c' coordinate
+    Sub_Vector_ref operator[](char c);
 
-    Cell& at (char c, int i)
-    {
-        i--;
-        int j = c - 'a';
-        return cells[i * N + j];
-    }
+    //says for itself
+    Chessboard* deepcopy();
+    //friend Chessboard* Chessboard::deepcopy();
 
     // friend VisualSteps* Figure::show_possible_steps(Coordinate position, Chessboard& chess);
 
@@ -58,7 +74,17 @@ struct Chessboard : MyWindow
 
     step_color step_chooser;
 
-    Graph_lib::Vector_ref<Cell> cells;
+    Vector_ref<Cell> cells;
+
+    //these are made so they don't get out of scope
+    Vector_ref<Pawn> pawns;
+    Vector_ref<Rook> rooks;
+    Vector_ref<Knight> knights;
+    Vector_ref<Bishop> bishops;
+    Vector_ref<Queen> queens;
+    Vector_ref<King> kings;
+
+
 
     static void cb_clicked (Address, Address widget)
     {
@@ -66,11 +92,20 @@ struct Chessboard : MyWindow
         dynamic_cast<Chessboard&>(btn.window()).clicked(btn);
     }
 
+    Cell& at(char c, int i)
+    {
+        i--;
+        int j = c - 'a';
+        return cells[i*N + j];
+    }
+
     void clicked (Cell& c);
 
     bool decide ();
 
     void step_swap () { step_chooser = (step_chooser == step_color::white) ? step_color::black : step_color::white; }
+
+    void reset_double_steps();
 
     Graph_lib::Marks x_labels;
     Graph_lib::Marks y_labels;
