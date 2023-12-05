@@ -64,9 +64,8 @@ struct Frame : Rectangle
     static constexpr int rc_length = 30;
 
     Chessboard* chess;
-
-    Vector_ref<Rectangle> horisontal_rectangles;  // Please check for
-    Vector_ref<Rectangle> vertical_rectangles;    // possible memory leaks
+    std::vector<Rectangle*> horisontal_rectangles;  // Please check for
+    std::vector<Rectangle*> vertical_rectangles;    // possible memory leaks
 };
 
 // Stores all shapes that represent all possible moves for currently clicked figure

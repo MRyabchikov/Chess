@@ -74,7 +74,7 @@ struct Figure : Graph_lib::Image
     const Cell* cell{nullptr};
 };
 
-bool King_is_under_attack (Chessboard& chess, bool is_white);// { return false; }
+bool King_is_under_attack (Chessboard& chess, bool is_white);
 
 struct Pawn : Figure
 {
@@ -106,10 +106,8 @@ struct King : Figure
 
     int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
-
     King* deepcopy(Chessboard& chess);
     //friend King* King::deepcopy(Chessboard& chess);
-
     bool is_king () override { return true; }
 };
 
@@ -120,12 +118,9 @@ struct Bishop : Figure
 
     int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
-
     Bishop* deepcopy(Chessboard& chess);
     //friend Bishop* Bishop::deepcopy(Chessboard& chess);
-
     bool is_bishop () override { return true; }
-
   private:
     // HF - help function
     void show_possible_steps_HF (int x, int y, int x0, int y0, int d1, int d2, VisualSteps*& steps_representation,
@@ -136,14 +131,14 @@ struct Knight : Figure
 {
     Knight(Graph_lib::Window& win, Figure::Type color)
         : Figure(win, color, color == Type::white ? "wN.png" : "bN.png"){};
-
     int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
 
     Knight* deepcopy(Chessboard& chess);
     //friend Knight* Knight::deepcopy(Chessboard& chess);
-
     bool is_knight () { return true; }
+    int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) override;
+    bool is_king () override { return false; }
 };
 
 struct Queen : Figure
@@ -153,11 +148,9 @@ struct Queen : Figure
 
     int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
-
     Queen* deepcopy(Chessboard& chess);
-    //friend Queen* Queen::deepcopy(Chessboard& chess);
-
     virtual bool is_queen () { return true; }
+    bool is_king () override { return false; }
 
   private:
     void horisontal_possible_steps (Coordinate& position, Chessboard& chess, VisualSteps*& steps_representation);
@@ -174,12 +167,9 @@ struct Rook : Figure
 
     int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
-
     Rook* deepcopy(Chessboard& chess);
-    //friend Rook* Rook::deepcopy(Chessboard& chess);
-
     bool is_rook () { return true; }
-
+    bool is_king () override { return false; }
   private:
     void horisontal_possible_steps (Coordinate& position, Chessboard& chess, VisualSteps*& steps_representation);
     void vertical_possible_steps (Coordinate& position, Chessboard& chess, VisualSteps*& steps_representation);

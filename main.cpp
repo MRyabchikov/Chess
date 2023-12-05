@@ -11,10 +11,5 @@ int main ()
     Chessboard chess{Chessboard_location};
     chess.standard_fill();
     chess.wait_for_button();
-
-    std::cout << "test";
-
     return 0;
 }
-
-// C:/Projects/build/Chessboard2/chessboard.exe

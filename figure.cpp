@@ -7,6 +7,24 @@
 
 using Graph_lib::Circle;
 
+bool King_is_under_attack (Chessboard& chess, bool is_white)
+{
+    Cell* king_ptr = nullptr;
+    for (int i = 0; i < chess.N; i++)
+        for (int j = 1; j <= chess.N; j++)
+            if (chess.at(i + a_ascii, j).has_figure() && chess.at(i + a_ascii, j).get_figure().is_king() &&
+                chess.at(i + a_ascii, j).get_figure().is_white() == is_white)
+                king_ptr = &(chess.at(i + a_ascii, j));
+    if (king_ptr == nullptr)
+        throw std::runtime_error("No king!");
+    for (int i = 0; i < chess.N; i++)
+        for (int j = 1; j <= chess.N; j++)
+            if (chess.at(i + a_ascii, j).has_figure() && chess.at(i + a_ascii, j).get_figure().is_white() != is_white &&
+                chess.at(i + a_ascii, j).get_figure().can_take_king(chess, *king_ptr))
+                return true;
+    return false;
+}
+
 void Figure::attach(const Cell& c)
 {
     move(c.center().x - point(0).x - 40, c.center().y - point(0).y - 45);
@@ -75,23 +93,25 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
              chess[char(x1 + 1)][y1].has_figure() && chess[char(x1 + 1)][y1].get_figure().is_pawn() &&
              chess[char(x1)][y1].get_figure().is_black() != chess[char(x1 + 1)][y1].get_figure().is_black() &&
              chess[char(x1 + 1)][y1].get_figure().double_step0() && (x2 == x1 + 1) && (y2 == y1 + decider))
+    if (chess.at(char(x1 - 1), y1).has_figure() && chess.at(char(x1 - 1), y1).get_figure().is_pawn() &&
+        chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1 - 1), y1).get_figure().is_black() &&
+        chess.at(char(x1 - 1), y1).get_figure().double_step0())
     {
-        return 3;
+        returning_value = 2;
+    }
+    else if (chess.at(char(x1 + 1), y1).has_figure() && chess.at(char(x1 + 1), y1).get_figure().is_pawn() &&
+             chess.at(char(x1), y1).get_figure().is_black() != chess.at(char(x1 + 1), y1).get_figure().is_black() &&
+             chess.at(char(x1 + 1), y1).get_figure().double_step0())
+    {
+        returning_value = 3;
     }
     else if (first_step)
     {
         if (x1 == x2 && ((y2 - y1 == 1 * decider) || (y2 - y1 == 2 * decider)) && !c2.has_figure())
         {
             if (y2 - y1 == 2 * decider)
-                if (chess[char(x1)][y1 + 1 * decider].has_figure())
-                    return 0;
-            if (y2 - y1 == 2 * decider && double_step == false)
-            {
-                double_step = 1;
-                steps_till_reset = 1;
-            }
-            first_step = false;
-            returning_value = 1;
+              first_step = false;
+        returning_value = 1;
         }
 
         else if ((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() &&
@@ -120,7 +140,6 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         else
             return 0;
     }
-    /*
     if (ensure_king_is_safe == false)
         return returning_value;
     else
@@ -155,7 +174,6 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             return returning_value;
         }
     }
-    */
     return returning_value;
 }
 
@@ -191,7 +209,6 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
             steps_representation->possible_steps.push_back(tempc);
             int sz = steps_representation->possible_steps.size();
             chess.attach(steps_representation->possible_steps[sz-1]);
-            // delete tempc;
         }
     }
     for (int i = -1; i <= 1; i += 2)
@@ -215,7 +232,6 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
                 chess.attach(steps_representation->possible_takes[sz-1]);
                 // delete tempf;
             }
-            
         }
     }
     return steps_representation;
@@ -255,7 +271,6 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         if (change_pos_decider(c2) == false)
             return false;
     }
-    /*
     if (ensure_king_is_safe == false)
         return true;
     else
@@ -290,8 +305,6 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             return true;
         }
     }
-    */
-    return true;
 }
 
 VisualSteps* Rook::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -376,8 +389,7 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
     int y1 = c1.location().y;
     int x2 = int(c2.location().x);
     int y2 = c2.location().y;
-
-    if (!(std::abs(x2 - x1) == 1 || std::abs(x2 - x1) == 2) || !(std::abs(y2 - y1) == 1 || std::abs(y2 - y1) == 2))
+    if (!((std::abs(x2 - x1) == 1 && std::abs(y2 - y1) == 2) || (std::abs(y2 - y1) == 1 && std::abs(x2 - x1) == 2)))
         return false;
 
     if ((std::abs(x2 - x1) == 1) && (std::abs(y2 - y1) == 2))
@@ -396,7 +408,6 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
                 return false;
         }
     }
-    /*
     if (ensure_king_is_safe == false)
         return true;
     else
@@ -431,7 +442,6 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
             return true;
         }
     }
-    */
     return true;
 }
 
@@ -478,7 +488,6 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
                 }
             }
         }
-    }
     return steps_representation;
 }
 
@@ -511,7 +520,6 @@ int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
     }
     if (change_pos_decider(c2) == false)
         return false;
-    /*
     if (ensure_king_is_safe == false)
         return true;
     else
@@ -546,7 +554,6 @@ int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
             return true;
         }
     }
-    */
     return true;
 }
 
@@ -667,7 +674,6 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_
         if (change_pos_decider(c2) == false)
             return false;
     }
-    /*
     if (ensure_king_is_safe == false)
         return true;
     else
@@ -702,7 +708,6 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_
             return true;
         }
     }
-    */
     return true;
 }
 
@@ -843,7 +848,6 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         return false;
     if (change_pos_decider(c2) == false)
         return false;
-    /*
     if (ensure_king_is_safe == false)
         return true;
     else
@@ -878,7 +882,6 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             return true;
         }
     }
-    */
     return true;
 }
 

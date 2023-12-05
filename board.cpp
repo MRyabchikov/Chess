@@ -2,7 +2,6 @@
 #include "cell.h"
 #include <iostream>
 
-
 Cell& Sub_Vector_ref::operator[](int i)
 {
     if(i < 1 || i > 8)
