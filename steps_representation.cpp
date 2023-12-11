@@ -9,24 +9,24 @@ DangerSign::DangerSign(Point center, Chessboard& chess_) : Circle{center, c_size
         for(int j = center.y - c_size/4; j <= center.y + c_size/4; j += c_size/2)
         {
             Circle* temporary_circle = new Circle{{i,j}, circle_radius};
-            temporary_circle->set_fill_color(Graph_lib::Color::red);
-            temporary_circle->set_color(Graph_lib::Color::red);
             circle_of_circles.push_back(temporary_circle);
+            circle_of_circles[circle_of_circles.size()-1].set_fill_color(Graph_lib::Color::red);
+            circle_of_circles[circle_of_circles.size()-1].set_color(Graph_lib::Color::red);
         }
     }
     for(int i = center.x - c_size/4 - c_size/8; i <= center.x + c_size/4 + c_size/8; i += c_size/4 + c_size/8)
     {
         Circle* temporary_circle = new Circle{{i,center.y}, circle_radius};
-        temporary_circle->set_fill_color(Graph_lib::Color::red);
-        temporary_circle->set_color(Graph_lib::Color::red);
         circle_of_circles.push_back(temporary_circle);
+        circle_of_circles[circle_of_circles.size()-1].set_fill_color(Graph_lib::Color::red);
+        circle_of_circles[circle_of_circles.size()-1].set_color(Graph_lib::Color::red);
     }
     for(int j = center.y - c_size/4 - c_size/8; j <= center.y + c_size/4 + c_size/8; j += c_size/2 + c_size/4)
     {
         Circle* temporary_circle = new Circle{{center.x,j}, circle_radius};
-        temporary_circle->set_fill_color(Graph_lib::Color::red);
-        temporary_circle->set_color(Graph_lib::Color::red);
         circle_of_circles.push_back(temporary_circle);
+        circle_of_circles[circle_of_circles.size()-1].set_fill_color(Graph_lib::Color::red);
+        circle_of_circles[circle_of_circles.size()-1].set_color(Graph_lib::Color::red);
     }
 
     chess = &chess_;
@@ -38,17 +38,15 @@ DangerSign::~DangerSign()
     for(int i = (int)circle_of_circles.size() - 1; i >= 0; i--)
     {
         //Graph_lib::Circle::~Circle();
-        chess->detach(*circle_of_circles[i]);
-        delete circle_of_circles[i];
-        circle_of_circles.erase(circle_of_circles.begin()+i,circle_of_circles.begin()+i+1);
-        chess->detach(*this);
+        chess->detach(circle_of_circles[i]);
     }
+    chess->detach(*this);
 }
 
 void DangerSign::draw_lines() const
 {
     for(int i = 0; i < int(circle_of_circles.size()); i++)
-        circle_of_circles[i]->draw_lines();
+        circle_of_circles[i].draw_lines();
 }
 
 RedCross::RedCross(Point center, Chessboard& chess_) : Rectangle{center, c_size, c_size}

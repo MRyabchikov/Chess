@@ -16,7 +16,7 @@ MyWindow::MyWindow(Point xy, int w, int h, const std::string& title)
 }
 
 void MyWindow::cb_quit(Address, Address widget)
-{  // void*
+{   // void*
     auto& btn = Graph_lib::reference_to<Graph_lib::Button>(widget);
     dynamic_cast<MyWindow&>(btn.window()).quit();
 }
@@ -259,10 +259,23 @@ void Chessboard::clicked(Cell& c)
         }
         selected = nullptr;
 
-        std::cout << (is_mate() ? "YES!\n" : "NO!\n");
+        //std::cout << (is_mate() ? "YES!\n" : "NO!\n");
 
-        if(is_mate())
+        if(!is_check() && !is_mate())
+        {
+            delete check_sign;
+            check_sign = nullptr;
+        }
+        if(is_check() && !is_mate())
+        {
+            check_sign = new DangerSign{find_king(step_chooser)->center(), *this};
+            this->attach(*check_sign);
+        }
+        if(is_check() && is_mate())
+        {
+            show_ending_message();
             step_chooser = none;
+        }
     }
     Fl::redraw();
 }
@@ -407,7 +420,22 @@ Chessboard* Chessboard::deepcopy()
 
 bool Chessboard::is_check()
 {
-    
+    Cell* king_ptr = find_king(step_chooser);
+
+    for(int i = a_ascii; i < a_ascii + N; i++)
+    {
+        for(int j = 1; j <= N; j++)
+        {
+            if(at(i,j).has_figure() &&
+               ((step_chooser == white && at(i,j).get_figure().is_black()) ||
+                (step_chooser == black && at(i,j).get_figure().is_white())))
+            {
+                if(at(i,j).get_figure().can_take_king(*this,*king_ptr))
+                    return true;
+            }
+        }
+    }
+    return false;
 }
 
 bool Chessboard::is_mate()
@@ -416,15 +444,16 @@ bool Chessboard::is_mate()
     {
         for(int j = 1; j <= N; j++)
         {
-            if(at(char(i),j).has_figure() &&
-               ((step_chooser == white && at(char(i),j).get_figure().is_white()) || (step_chooser == black && at(char(i),j).get_figure().is_black())))
+            if(at(i,j).has_figure() &&
+               ((step_chooser == white && at(i,j).get_figure().is_white()) ||
+                (step_chooser == black && at(i,j).get_figure().is_black())))
             {
                 for(int i_ = a_ascii; i_ < a_ascii + N; i_++)
                 {
                     for(int j_ = 1; j_ <= N; j_++)
                     {
                         if((!(i == i_ && j == j_)) &&
-                           at(char(i),j).get_figure().correct_step(at(char(i),j), at(char(i_),j_), *this, true))
+                           at(i,j).get_figure().correct_step(at(i,j), at(i_,j_), *this, true))
                         {
                             return false;
                         }
@@ -434,4 +463,39 @@ bool Chessboard::is_mate()
         }
     }
     return true;
+}
+
+void Chessboard::show_ending_message()
+{
+    std::string who_won = ((step_chooser == white) ? "BLACKS WON" : "WHITES WON");
+
+    Text* txt1 = new Text{Graph_lib::Point{DFTBOF + 4*c_size - int(3*standard_font_size), DFTBOF + 4*c_size - standard_font_size},"CHECKMATE!"};
+    Text* txt2 = new Text{Graph_lib::Point{DFTBOF + 4*c_size - int(3*standard_font_size), DFTBOF + 4*c_size}, who_won};
+    texts.push_back(txt1);
+    texts[texts.size()-1].set_font_size(standard_font_size);
+    this->attach(texts[texts.size()-1]);
+    texts.push_back(txt2);
+    texts[texts.size()-1].set_font_size(standard_font_size);
+    this->attach(texts[texts.size()-1]);
+}
+
+Cell* Chessboard::find_king(step_color color)
+{
+    Cell* king_ptr = nullptr;
+
+    for(int i = a_ascii; i < a_ascii + N; i++)
+    {
+        for(int j = 1; j <= N; j++)
+        {
+            if(at(i,j).has_figure() && at(i,j).get_figure().is_king() &&
+               ((color == white && at(i,j).get_figure().is_white()) ||
+                (color == black && at(i,j).get_figure().is_black())))
+            {
+                king_ptr = &(at(i,j));
+            }
+        }
+    }
+    if(king_ptr == nullptr)
+        throw std::runtime_error("No king!");
+    return king_ptr;
 }

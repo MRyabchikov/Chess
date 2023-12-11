@@ -31,7 +31,7 @@ struct DangerSign : Circle
 
     Chessboard* chess;
 
-    std::vector<Circle*> circle_of_circles;  // Please check for possible memory leaks
+    Vector_ref<Circle> circle_of_circles;  // Please check for possible memory leaks
 };
 
 struct RedCross : Rectangle

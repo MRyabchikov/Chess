@@ -7,11 +7,12 @@
 using Graph_lib::Address;
 using Graph_lib::Point;
 using Graph_lib::Vector_ref;
+using Graph_lib::Text;
 
 const Graph_lib::Point Chessboard_location{200,200};
 
-//Class, that doesn't allow you to shoot yourself in the foot while
-//trying to get a "Cell" value using indices
+// Class, that doesn't allow you to shoot yourself in the foot while
+// trying to get a "Cell" value using indices
 class Sub_Vector_ref
 {
     public:
@@ -55,14 +56,12 @@ struct Chessboard : MyWindow
     static constexpr int N = 8;
     static constexpr int N_max = 8;
     static_assert(N <= N_max, "do not allow board larger than N_max*N_max");
-    //return a 1D array of values of a column of a 'c' coordinate
+
+    // return a 1D array of values of a column of a 'c' coordinate
     Sub_Vector_ref operator[](char c);
 
-    //says for itself
+    // says for itself
     Chessboard* deepcopy();
-    //friend Chessboard* Chessboard::deepcopy();
-
-    // friend VisualSteps* Figure::show_possible_steps(Coordinate position, Chessboard& chess);
 
     bool out_of_range (Coordinate pos);
 
@@ -73,6 +72,7 @@ struct Chessboard : MyWindow
         static constexpr int margin = 30;
         static constexpr int width = N * Cell::size + 2 * margin + 70;
         static constexpr int height = N * Cell::size + 2 * margin;
+        static constexpr int standard_font_size = 40;
 
         step_color step_chooser;
 
@@ -86,7 +86,9 @@ struct Chessboard : MyWindow
         Vector_ref<Queen> queens;
         Vector_ref<King> kings;
 
+        Vector_ref<Text> texts;
 
+        DangerSign* check_sign = nullptr;
 
         static void cb_clicked (Address, Address widget)
         {
@@ -113,10 +115,14 @@ struct Chessboard : MyWindow
 
         bool is_mate();
 
+        void show_ending_message();
+
         Graph_lib::Marks x_labels;
         Graph_lib::Marks y_labels;
 
         Cell* selected{nullptr};
 
         VisualSteps* all_possible_steps;
+
+        Cell* find_king(step_color color);
 };

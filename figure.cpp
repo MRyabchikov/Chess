@@ -10,17 +10,17 @@ using Graph_lib::Circle;
 bool king_is_under_attack (Chessboard& chess, bool is_white)
 {
     Cell* king_ptr = nullptr;
-    for (int i = 0; i < chess.N; i++)
+    for (int i = a_ascii; i < chess.N + a_ascii; i++)
         for (int j = 1; j <= chess.N; j++)
-            if (chess[i + a_ascii][j].has_figure() && chess[i + a_ascii][j].get_figure().is_king() &&
-                chess[i + a_ascii][j].get_figure().is_white() == is_white)
-                king_ptr = &(chess[i + a_ascii][j]);
+            if (chess[i][j].has_figure() && chess[i][j].get_figure().is_king() &&
+                chess[i][j].get_figure().is_white() == is_white)
+                king_ptr = &(chess[i][j]);
     if (king_ptr == nullptr)
         throw std::runtime_error("No king!");
-    for (int i = 0; i < chess.N; i++)
+    for (int i = a_ascii; i < a_ascii + chess.N; i++)
         for (int j = 1; j <= chess.N; j++)
-            if (chess[i + a_ascii][j].has_figure() && chess[i + a_ascii][j].get_figure().is_white() != is_white &&
-                chess[i + a_ascii][j].get_figure().can_take_king(chess, *king_ptr))
+            if (chess[i][j].has_figure() && chess[i][j].get_figure().is_white() != is_white &&
+                chess[i][j].get_figure().can_take_king(chess, *king_ptr))
                 return true;
     return false;
 }
@@ -83,16 +83,16 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
     int y2 = c2.location().y;
 
     if ((a_ascii <= x1 - 1 && x1 - 1 <= a_ascii + 7) &&
-        chess[char(x1 - 1)][y1].has_figure() && chess[char(x1 - 1)][y1].get_figure().is_pawn() &&
-        chess[char(x1)][y1].get_figure().is_black() != chess[char(x1 - 1)][y1].get_figure().is_black() &&
-        chess[char(x1 - 1)][y1].get_figure().double_step0() && (x2 == x1 - 1) && (y2 == y1 + decider))
+        chess[x1 - 1][y1].has_figure() && chess[x1 - 1][y1].get_figure().is_pawn() &&
+        chess[x1][y1].get_figure().is_black() != chess[x1 - 1][y1].get_figure().is_black() &&
+        chess[x1 - 1][y1].get_figure().double_step0() && (x2 == x1 - 1) && (y2 == y1 + decider))
     {
         returning_value = 2;
     }
     else if ((a_ascii <= x1 + 1 && x1 + 1 <= a_ascii + 7) &&
-             chess[char(x1 + 1)][y1].has_figure() && chess[char(x1 + 1)][y1].get_figure().is_pawn() &&
-             chess[char(x1)][y1].get_figure().is_black() != chess[char(x1 + 1)][y1].get_figure().is_black() &&
-             chess[char(x1 + 1)][y1].get_figure().double_step0() && (x2 == x1 + 1) && (y2 == y1 + decider))
+             chess[x1 + 1][y1].has_figure() && chess[x1 + 1][y1].get_figure().is_pawn() &&
+             chess[x1][y1].get_figure().is_black() != chess[x1 + 1][y1].get_figure().is_black() &&
+             chess[x1 + 1][y1].get_figure().double_step0() && (x2 == x1 + 1) && (y2 == y1 + decider))
     {
         returning_value = 3;
     }
@@ -177,7 +177,9 @@ bool Pawn::can_take_king (Chessboard& chess, Cell& king_position)
     bool first_step_reserved = first_step;            // Костыль
     bool double_step_reserved = double_step;          // Костыль
     int steps_till_reset_reserved = steps_till_reset; // Костыль
+
     bool returning_value = correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false);
+
     first_step = first_step_reserved;
     double_step = double_step_reserved;
     steps_till_reset = steps_till_reset_reserved;
@@ -224,9 +226,9 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
     }
     for (int i = -1; i <= 1; i += 2)
     {
-        if (int(x) + i >= a_ascii && int(x) + i <= 7 + a_ascii)
+        if (x + i >= a_ascii && x + i < chess.N + a_ascii)
         {
-            int a = correct_step(chess[x][y], chess[char(int(x) + i)][y + decider * 1], chess);
+            int a = correct_step(chess[x][y], chess[x + i][y + decider * 1], chess);
             if (a)
             {
                 first_step = first_step_reserved;               // Костыль
@@ -235,11 +237,11 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
 
                 Frame* tempf;
                 if (a == 1)
-                    tempf = new Frame{chess[char(int(x) + i)][y + decider].center(), chess};
+                    tempf = new Frame{chess[x + i][y + decider].center(), chess};
                 if (a == 2)
-                    tempf = new Frame{chess[char(int(x) - 1)][y + decider].center(), chess};
+                    tempf = new Frame{chess[x - 1][y + decider].center(), chess};
                 if (a == 3)
-                    tempf = new Frame{chess[char(int(x) + 1)][y + decider].center(), chess};
+                    tempf = new Frame{chess[x + 1][y + decider].center(), chess};
                 steps_representation->possible_takes.push_back(tempf);
                 int sz = steps_representation->possible_takes.size();
                 chess.attach(steps_representation->possible_takes[sz-1]);
@@ -269,7 +271,7 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         d = (x2 > x1) ? 1 : -1;
 
         for (int i = x1 + d; i != x2; i += d)
-            if (chess[char(i)][y1].has_figure())
+            if (chess[i][y1].has_figure())
                 return false;
         if (change_pos_decider(c2) == false)
             return false;
@@ -279,7 +281,7 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         d = (y2 > y1) ? 1 : -1;
 
         for (int i = y1 + d; i != y2; i += d)
-            if (chess[char(x1)][i].has_figure())
+            if (chess[x1][i].has_figure())
                 return false;
         if (change_pos_decider(c2) == false)
             return false;
@@ -335,13 +337,13 @@ void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, Vi
     // d is made to reduce copy + paste
     for (int d = -1; d <= 1; d += 2)
     {
-        for (int i = int(position.x) + d; i != a_ascii - 1 + (4.5 + 4.5 * d); i += d)
+        for (int i = position.x + d; i != a_ascii - 1 + (4.5 + 4.5 * d); i += d)
         {
-            if (correct_step(chess[position.x][position.y], chess[char(i)][position.y], chess))
+            if (correct_step(chess[position.x][position.y], chess[i][position.y], chess))
             {
-                if (chess[char(i)][position.y].has_figure())
+                if (chess[i][position.y].has_figure())
                 {
-                    Frame* tempf = new Frame{chess[char(i)][position.y].center(), chess};
+                    Frame* tempf = new Frame{chess[i][position.y].center(), chess};
                     steps_representation->possible_takes.push_back(tempf);
                     int sz = steps_representation->possible_takes.size();
                     chess.attach(steps_representation->possible_takes[sz-1]);
@@ -350,7 +352,7 @@ void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, Vi
                 }
                 else
                 {
-                    Circle* tempc = new Circle{chess[char(i)][position.y].center(), c_size / 4};
+                    Circle* tempc = new Circle{chess[i][position.y].center(), c_size / 4};
                     tempc->set_color(chess_yellow);
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
@@ -479,7 +481,7 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
     {
         if (!chess.out_of_range(pos))
         {
-            if (correct_step(chess[char(x)][y], chess[pos.x][pos.y], chess))
+            if (correct_step(chess[x][y], chess[pos.x][pos.y], chess))
             {
                 if (chess[pos.x][pos.y].has_figure())
                 {
@@ -600,11 +602,11 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
 {
     while (!chess.out_of_range(Coordinate{char(x), y}))
     {
-        if (correct_step(chess[char(x0)][y0], chess[char(x)][y], chess))
+        if (correct_step(chess[x0][y0], chess[x][y], chess))
         {
-            if (chess[char(x)][y].has_figure())
+            if (chess[x][y].has_figure())
             {
-                Frame* tempf = new Frame{chess[char(x)][y].center(), chess};
+                Frame* tempf = new Frame{chess[x][y].center(), chess};
                 steps_representation->possible_takes.push_back(tempf);
                 int sz = steps_representation->possible_takes.size();
                 chess.attach(steps_representation->possible_takes[sz-1]);
@@ -613,7 +615,7 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
             }
             else
             {
-                Circle* tempc = new Circle{chess[char(x)][y].center(), c_size / 4};
+                Circle* tempc = new Circle{chess[x][y].center(), c_size / 4};
                 tempc->set_color(chess_yellow);
                 tempc->set_fill_color(chess_yellow);
                 steps_representation->possible_steps.push_back(tempc);
@@ -652,7 +654,7 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_
             d = (x2 > x1) ? 1 : -1;
 
             for (int i = x1 + d; i != x2; i += d)
-                if (chess[char(i)][y1].has_figure())
+                if (chess[i][y1].has_figure())
                     return false;
             if (change_pos_decider(c2) == false)
                 return false;
@@ -662,7 +664,7 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_
             d = (y2 > y1) ? 1 : -1;
 
             for (int i = y1 + d; i != y2; i += d)
-                if (chess[char(x1)][i].has_figure())
+                if (chess[x1][i].has_figure())
                     return false;
             if (change_pos_decider(c2) == false)
                 return false;
@@ -746,13 +748,13 @@ void Queen::horisontal_possible_steps(Coordinate& position, Chessboard& chess, V
     // d is made to reduce copy + paste
     for (int d = -1; d <= 1; d += 2)
     {
-        for (int i = int(position.x) + d; i != a_ascii - 1 + (4.5 + 4.5 * d); i += d)
+        for (int i = position.x + d; i != a_ascii - 1 + (4.5 + 4.5 * d); i += d)
         {
-            if (correct_step(chess[position.x][position.y], chess[char(i)][position.y], chess))
+            if (correct_step(chess[position.x][position.y], chess[i][position.y], chess))
             {
-                if (chess[char(i)][position.y].has_figure())
+                if (chess[i][position.y].has_figure())
                 {
-                    Frame* tempf = new Frame{chess[char(i)][position.y].center(), chess};
+                    Frame* tempf = new Frame{chess[i][position.y].center(), chess};
                     steps_representation->possible_takes.push_back(tempf);
                     int sz = steps_representation->possible_takes.size();
                     chess.attach(steps_representation->possible_takes[sz-1]);
@@ -761,7 +763,7 @@ void Queen::horisontal_possible_steps(Coordinate& position, Chessboard& chess, V
                 }
                 else
                 {
-                    Circle* tempc = new Circle{chess[char(i)][position.y].center(), c_size / 4};
+                    Circle* tempc = new Circle{chess[i][position.y].center(), c_size / 4};
                     tempc->set_color(chess_yellow);
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
@@ -828,11 +830,11 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
 {
     while (!chess.out_of_range(Coordinate{char(x), y}))
     {
-        if (correct_step(chess[char(x0)][y0], chess[char(x)][y], chess))
+        if (correct_step(chess[x0][y0], chess[x][y], chess))
         {
-            if (chess[char(x)][y].has_figure())
+            if (chess[x][y].has_figure())
             {
-                Frame* tempf = new Frame{chess[char(x)][y].center(), chess};
+                Frame* tempf = new Frame{chess[x][y].center(), chess};
                 steps_representation->possible_takes.push_back(tempf);
                 int sz = steps_representation->possible_takes.size();
                 chess.attach(steps_representation->possible_takes[sz-1]);
@@ -841,7 +843,7 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
             }
             else
             {
-                Circle* tempc = new Circle{chess[char(x)][y].center(), c_size / 4};
+                Circle* tempc = new Circle{chess[x][y].center(), c_size / 4};
                 tempc->set_color(chess_yellow);
                 tempc->set_fill_color(chess_yellow);
                 steps_representation->possible_steps.push_back(tempc);
@@ -903,21 +905,21 @@ VisualSteps* King::show_possible_steps(Coordinate position, Chessboard& chess)
 {
     // I know it's less effective, but easier to read, maybe should be rewritten
     VisualSteps* steps_representation = new VisualSteps{chess};
-    for (int i = 0; i < chess.N; i++)
+    for (int i = a_ascii; i < a_ascii + chess.N; i++)
         for (int j = 1; j <= chess.N; j++)
         {
-            if (correct_step(chess[position.x][position.y], chess[i + a_ascii][j], chess))
+            if (correct_step(chess[position.x][position.y], chess[i][j], chess))
             {
-                if (chess[i + a_ascii][j].has_figure())
+                if (chess[i][j].has_figure())
                 {
-                    Frame* tempf = new Frame{chess[i + a_ascii][j].center(), chess};
+                    Frame* tempf = new Frame{chess[i][j].center(), chess};
                     steps_representation->possible_takes.push_back(tempf);
                     int sz = steps_representation->possible_takes.size();
                     chess.attach(steps_representation->possible_takes[sz-1]);
                 }
                 else
                 {
-                    Circle* tempc = new Circle{chess[i + a_ascii][j].center(), c_size / 4};
+                    Circle* tempc = new Circle{chess[i][j].center(), c_size / 4};
                     tempc->set_color(chess_yellow);
                     tempc->set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(tempc);
