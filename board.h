@@ -44,7 +44,8 @@ struct Chessboard : MyWindow
     enum step_color
     {
         white,
-        black
+        black,
+        none
     };
 
     Chessboard(Point xy);
@@ -54,7 +55,6 @@ struct Chessboard : MyWindow
     static constexpr int N = 8;
     static constexpr int N_max = 8;
     static_assert(N <= N_max, "do not allow board larger than N_max*N_max");
-
     //return a 1D array of values of a column of a 'c' coordinate
     Sub_Vector_ref operator[](char c);
 
@@ -62,9 +62,11 @@ struct Chessboard : MyWindow
     Chessboard* deepcopy();
     //friend Chessboard* Chessboard::deepcopy();
 
-    //friend VisualSteps* Figure::show_possible_steps(Coordinate position, Chessboard& chess);
+    // friend VisualSteps* Figure::show_possible_steps(Coordinate position, Chessboard& chess);
 
-    bool out_of_range(Coordinate pos);
+    bool out_of_range (Coordinate pos);
+
+    bool is_stalemate (step_color stalemate_candidate) { return true; }
 
     private:
 
@@ -106,6 +108,10 @@ struct Chessboard : MyWindow
         void step_swap() {step_chooser = (step_chooser == step_color::white) ? step_color::black : step_color::white;}
 
         void reset_double_steps();
+
+        bool is_check();
+
+        bool is_mate();
 
         Graph_lib::Marks x_labels;
         Graph_lib::Marks y_labels;

@@ -59,10 +59,10 @@ struct Cell : Graph_lib::Button
     /*const*/ Figure& get_figure ();  // обязательно нужна проверка не нулевой ли указатель checker
 
     Coordinate location() const; //gets pair {char x , int y} - coordinate of a cell
-  private:
+    private:
 
-    Type type;
-    void reset_color ();
-    Figure* figure{nullptr};
+        Type type;
+        void reset_color ();
+        Figure* figure{nullptr};
 
 };

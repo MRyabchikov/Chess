@@ -2,7 +2,6 @@
 #include "cell.h"
 #include <iostream>
 
-
 Cell& Sub_Vector_ref::operator[](int i)
 {
     if(i < 1 || i > 8)
@@ -227,7 +226,7 @@ void Chessboard::clicked(Cell& c)
                 int b;
                 if (step_chooser == black)
                     b = 1;
-                else
+                else if(step_chooser == white)
                     b = -1;
                 if (c.has_figure())
                 {
@@ -259,6 +258,11 @@ void Chessboard::clicked(Cell& c)
             all_possible_steps = nullptr;
         }
         selected = nullptr;
+
+        std::cout << (is_mate() ? "YES!\n" : "NO!\n");
+
+        if(is_mate())
+            step_chooser = none;
     }
     Fl::redraw();
 }
@@ -267,7 +271,9 @@ bool Chessboard::decide()
 {
     if (!selected->has_figure())
         return false;
-    if (step_chooser == step_color::white && selected->get_figure().is_black())
+    else if(step_chooser == step_color::none)
+        return false;
+    else if (step_chooser == step_color::white && selected->get_figure().is_black())
         return false;
     else if (step_chooser == step_color::black && selected->get_figure().is_white())
         return false;
@@ -397,4 +403,35 @@ Chessboard* Chessboard::deepcopy()
     }
     
     return chess;
+}
+
+bool Chessboard::is_check()
+{
+    
+}
+
+bool Chessboard::is_mate()
+{
+    for(int i = a_ascii; i < a_ascii + N; i++)
+    {
+        for(int j = 1; j <= N; j++)
+        {
+            if(at(char(i),j).has_figure() &&
+               ((step_chooser == white && at(char(i),j).get_figure().is_white()) || (step_chooser == black && at(char(i),j).get_figure().is_black())))
+            {
+                for(int i_ = a_ascii; i_ < a_ascii + N; i_++)
+                {
+                    for(int j_ = 1; j_ <= N; j_++)
+                    {
+                        if((!(i == i_ && j == j_)) &&
+                           at(char(i),j).get_figure().correct_step(at(char(i),j), at(char(i_),j_), *this, true))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
 }

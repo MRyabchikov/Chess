@@ -7,6 +7,24 @@
 
 using Graph_lib::Circle;
 
+bool king_is_under_attack (Chessboard& chess, bool is_white)
+{
+    Cell* king_ptr = nullptr;
+    for (int i = 0; i < chess.N; i++)
+        for (int j = 1; j <= chess.N; j++)
+            if (chess[i + a_ascii][j].has_figure() && chess[i + a_ascii][j].get_figure().is_king() &&
+                chess[i + a_ascii][j].get_figure().is_white() == is_white)
+                king_ptr = &(chess[i + a_ascii][j]);
+    if (king_ptr == nullptr)
+        throw std::runtime_error("No king!");
+    for (int i = 0; i < chess.N; i++)
+        for (int j = 1; j <= chess.N; j++)
+            if (chess[i + a_ascii][j].has_figure() && chess[i + a_ascii][j].get_figure().is_white() != is_white &&
+                chess[i + a_ascii][j].get_figure().can_take_king(chess, *king_ptr))
+                return true;
+    return false;
+}
+
 void Figure::attach(const Cell& c)
 {
     move(c.center().x - point(0).x - 40, c.center().y - point(0).y - 45);
@@ -76,18 +94,15 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
              chess[char(x1)][y1].get_figure().is_black() != chess[char(x1 + 1)][y1].get_figure().is_black() &&
              chess[char(x1 + 1)][y1].get_figure().double_step0() && (x2 == x1 + 1) && (y2 == y1 + decider))
     {
-        return 3;
+        returning_value = 3;
     }
     else if (first_step)
     {
         if (x1 == x2 && ((y2 - y1 == 1 * decider) || (y2 - y1 == 2 * decider)) && !c2.has_figure())
         {
             if (y2 - y1 == 2 * decider)
-                if (chess[char(x1)][y1 + 1 * decider].has_figure())
-                    return 0;
-            if (y2 - y1 == 2 * decider && double_step == false)
             {
-                double_step = 1;
+                double_step = true;
                 steps_till_reset = 1;
             }
             first_step = false;
@@ -120,7 +135,6 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         else
             return 0;
     }
-    /*
     if (ensure_king_is_safe == false)
         return returning_value;
     else
@@ -155,7 +169,18 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             return returning_value;
         }
     }
-    */
+    return returning_value;
+}
+
+bool Pawn::can_take_king (Chessboard& chess, Cell& king_position)
+{
+    bool first_step_reserved = first_step;            // Костыль
+    bool double_step_reserved = double_step;          // Костыль
+    int steps_till_reset_reserved = steps_till_reset; // Костыль
+    bool returning_value = correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false);
+    first_step = first_step_reserved;
+    double_step = double_step_reserved;
+    steps_till_reset = steps_till_reset_reserved;
     return returning_value;
 }
 
@@ -176,14 +201,18 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
     if (position.y == int(4.5 + 3.5 * decider))  // If pawn has reached the end of the board
         return steps_representation;             // It can't move anymore (for now)
 
-    bool first_step_reserved = first_step;       // Костыль
+    bool first_step_reserved = first_step;              // Костыль
+    bool double_step_reserved = double_step;            // Костыль
+    int steps_till_reset_reserved = steps_till_reset;   // Костыль
 
     for (int i = 1; i <= (first_step ? 2 : 1); i++)
     {
         if (correct_step(chess[x][y], chess[x][y + i * decider], chess))
         {
 
-            first_step = first_step_reserved;     // Костыль
+            first_step = first_step_reserved;               // Костыль
+            double_step = double_step_reserved;             // Костыль
+            steps_till_reset = steps_till_reset_reserved;   // Костыль
 
             Circle* tempc = new Circle{chess[x][y + i * decider].center(), c_size / 4};
             tempc->set_color(chess_yellow);
@@ -191,7 +220,6 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
             steps_representation->possible_steps.push_back(tempc);
             int sz = steps_representation->possible_steps.size();
             chess.attach(steps_representation->possible_steps[sz-1]);
-            // delete tempc;
         }
     }
     for (int i = -1; i <= 1; i += 2)
@@ -201,7 +229,9 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
             int a = correct_step(chess[x][y], chess[char(int(x) + i)][y + decider * 1], chess);
             if (a)
             {
-                first_step = first_step_reserved;  // Костыль
+                first_step = first_step_reserved;               // Костыль
+                double_step = double_step_reserved;             // Костыль
+                steps_till_reset = steps_till_reset_reserved;   // Костыль
 
                 Frame* tempf;
                 if (a == 1)
@@ -215,7 +245,6 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
                 chess.attach(steps_representation->possible_takes[sz-1]);
                 // delete tempf;
             }
-            
         }
     }
     return steps_representation;
@@ -255,7 +284,6 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         if (change_pos_decider(c2) == false)
             return false;
     }
-    /*
     if (ensure_king_is_safe == false)
         return true;
     else
@@ -290,8 +318,6 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             return true;
         }
     }
-    */
-    return true;
 }
 
 VisualSteps* Rook::show_possible_steps(Coordinate position, Chessboard& chess)
@@ -376,8 +402,7 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
     int y1 = c1.location().y;
     int x2 = int(c2.location().x);
     int y2 = c2.location().y;
-
-    if (!(std::abs(x2 - x1) == 1 || std::abs(x2 - x1) == 2) || !(std::abs(y2 - y1) == 1 || std::abs(y2 - y1) == 2))
+    if (!((std::abs(x2 - x1) == 1 && std::abs(y2 - y1) == 2) || (std::abs(y2 - y1) == 1 && std::abs(x2 - x1) == 2)))
         return false;
 
     if ((std::abs(x2 - x1) == 1) && (std::abs(y2 - y1) == 2))
@@ -396,7 +421,6 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
                 return false;
         }
     }
-    /*
     if (ensure_king_is_safe == false)
         return true;
     else
@@ -431,7 +455,6 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
             return true;
         }
     }
-    */
     return true;
 }
 
@@ -511,7 +534,6 @@ int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
     }
     if (change_pos_decider(c2) == false)
         return false;
-    /*
     if (ensure_king_is_safe == false)
         return true;
     else
@@ -546,7 +568,6 @@ int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
             return true;
         }
     }
-    */
     return true;
 }
 
@@ -667,7 +688,6 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_
         if (change_pos_decider(c2) == false)
             return false;
     }
-    /*
     if (ensure_king_is_safe == false)
         return true;
     else
@@ -702,7 +722,6 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_
             return true;
         }
     }
-    */
     return true;
 }
 
@@ -843,7 +862,6 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         return false;
     if (change_pos_decider(c2) == false)
         return false;
-    /*
     if (ensure_king_is_safe == false)
         return true;
     else
@@ -878,7 +896,6 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             return true;
         }
     }
-    */
     return true;
 }
 
