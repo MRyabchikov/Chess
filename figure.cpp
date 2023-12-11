@@ -134,7 +134,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             has_deleted_figure = true;
         }
         c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        if (king_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
             if (has_deleted_figure)
@@ -269,7 +269,7 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             has_deleted_figure = true;
         }
         c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        if (king_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
             if (has_deleted_figure)
@@ -410,7 +410,7 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
             has_deleted_figure = true;
         }
         c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        if (king_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
             if (has_deleted_figure)
@@ -525,7 +525,7 @@ int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
             has_deleted_figure = true;
         }
         c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        if (king_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
             if (has_deleted_figure)
@@ -681,7 +681,7 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_
             has_deleted_figure = true;
         }
         c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        if (king_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
             if (has_deleted_figure)
@@ -857,7 +857,7 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             has_deleted_figure = true;
         }
         c2.attach_figure(c1.detach_figure());
-        if (King_is_under_attack(chess, c2.get_figure().is_white()))
+        if (king_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
             if (has_deleted_figure)
