@@ -87,6 +87,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         chess[x1][y1].get_figure().is_black() != chess[x1 - 1][y1].get_figure().is_black() &&
         chess[x1 - 1][y1].get_figure().double_step0() && (x2 == x1 - 1) && (y2 == y1 + decider))
     {
+        first_step = false;
         returning_value = 2;
     }
     else if ((a_ascii <= x1 + 1 && x1 + 1 <= a_ascii + 7) &&
@@ -94,6 +95,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
              chess[x1][y1].get_figure().is_black() != chess[x1 + 1][y1].get_figure().is_black() &&
              chess[x1 + 1][y1].get_figure().double_step0() && (x2 == x1 + 1) && (y2 == y1 + decider))
     {
+        first_step = false;
         returning_value = 3;
     }
     else if (first_step)
@@ -102,6 +104,10 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         {
             if (y2 - y1 == 2 * decider)
             {
+                if(chess[x1][y1 + decider].has_figure())
+                {
+                    return 0;
+                }
                 double_step = true;
                 steps_till_reset = 1;
             }
@@ -123,13 +129,13 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
     {
         if (x1 == x2 && (y2 - y1 == 1 * decider) && !c2.has_figure())
         {
-            double_step = 0;
+            double_step = false;
             returning_value = 1;
         }
         else if ((x1 == x2 + 1 || x1 == x2 - 1) && (y2 - y1 == 1 * decider) && c2.has_figure() &&
                  c2.get_figure().is_black() == take_decider)
         {
-            double_step = 0;
+            double_step = false;
             returning_value = 1;
         }
         else
@@ -156,7 +162,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                 c2.attach_figure(*tmp);
                 chess.attach(*tmp);
             }
-            return 0;
+            return -1;
         }
         else
         {
@@ -209,7 +215,8 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
 
     for (int i = 1; i <= (first_step ? 2 : 1); i++)
     {
-        if (correct_step(chess[x][y], chess[x][y + i * decider], chess))
+        int a = correct_step(chess[x][y], chess[x][y + i * decider], chess);
+        if (a > 0)
         {
 
             first_step = first_step_reserved;               // Костыль
@@ -223,13 +230,24 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
             int sz = steps_representation->possible_steps.size();
             chess.attach(steps_representation->possible_steps[sz-1]);
         }
+        else if (a == -1)
+        {
+            first_step = first_step_reserved;               // Костыль
+            double_step = double_step_reserved;             // Костыль
+            steps_till_reset = steps_till_reset_reserved;   // Костыль
+
+            RedCross* temprc = new RedCross{chess[x][y + i * decider].center(), chess};
+            steps_representation->disabled_steps.push_back(temprc);
+            int sz = steps_representation->disabled_steps.size();
+            chess.attach(steps_representation->disabled_steps[sz-1]);
+        }
     }
     for (int i = -1; i <= 1; i += 2)
     {
         if (x + i >= a_ascii && x + i < chess.N + a_ascii)
         {
-            int a = correct_step(chess[x][y], chess[x + i][y + decider * 1], chess);
-            if (a)
+            int a = correct_step(chess[x][y], chess[x + i][y + decider*1], chess);
+            if (a > 0)
             {
                 first_step = first_step_reserved;               // Костыль
                 double_step = double_step_reserved;             // Костыль
@@ -246,6 +264,17 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
                 int sz = steps_representation->possible_takes.size();
                 chess.attach(steps_representation->possible_takes[sz-1]);
                 // delete tempf;
+            }
+            if (a == -1)
+            {
+                first_step = first_step_reserved;               // Костыль
+                double_step = double_step_reserved;             // Костыль
+                steps_till_reset = steps_till_reset_reserved;   // Костыль
+
+                RedCross* temprc = new RedCross{chess[x + i][y + decider*1].center(), chess};
+                steps_representation->disabled_steps.push_back(temprc);
+                int sz = steps_representation->disabled_steps.size();
+                chess.attach(steps_representation->disabled_steps[sz-1]);
             }
         }
     }
@@ -307,7 +336,7 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                 c2.attach_figure(*tmp);
                 chess.attach(*tmp);
             }
-            return false;
+            return -1;
         }
         else
         {
@@ -339,7 +368,8 @@ void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, Vi
     {
         for (int i = position.x + d; i != a_ascii - 1 + (4.5 + 4.5 * d); i += d)
         {
-            if (correct_step(chess[position.x][position.y], chess[i][position.y], chess))
+            int a = correct_step(chess[position.x][position.y], chess[i][position.y], chess);
+            if (a > 0)
             {
                 if (chess[i][position.y].has_figure())
                 {
@@ -361,6 +391,13 @@ void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, Vi
                     // delete tempc;
                 }
             }
+            else if(a == -1)
+            {
+                RedCross* temprc = new RedCross{chess[i][position.y].center(), chess};
+                steps_representation->disabled_steps.push_back(temprc);
+                int sz = steps_representation->disabled_steps.size();
+                chess.attach(steps_representation->disabled_steps[sz-1]);
+            }
         }
     }
 }
@@ -372,7 +409,8 @@ void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, Visu
     {
         for (int i = position.y + d; i != int(4.5 + 4.5 * d); i += d)
         {
-            if (correct_step(chess[position.x][position.y], chess[position.x][i], chess))
+            int a = correct_step(chess[position.x][position.y], chess[position.x][i], chess);
+            if (a > 0)
             {
                 if (chess[position.x][i].has_figure())
                 {
@@ -393,6 +431,13 @@ void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, Visu
                     chess.attach(steps_representation->possible_steps[sz-1]);
                     // delete tempc;
                 }
+            }
+            else if (a == -1)
+            {
+                RedCross* temprc = new RedCross{chess[position.x][i].center(), chess};
+                steps_representation->disabled_steps.push_back(temprc);
+                int sz = steps_representation->disabled_steps.size();
+                chess.attach(steps_representation->disabled_steps[sz-1]);
             }
         }
     }
@@ -444,7 +489,7 @@ int Knight::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
                 c2.attach_figure(*tmp);
                 chess.attach(*tmp);
             }
-            return false;
+            return -1;
         }
         else
         {
@@ -481,7 +526,8 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
     {
         if (!chess.out_of_range(pos))
         {
-            if (correct_step(chess[x][y], chess[pos.x][pos.y], chess))
+            int a = correct_step(chess[x][y], chess[pos.x][pos.y], chess);
+            if (a > 0)
             {
                 if (chess[pos.x][pos.y].has_figure())
                 {
@@ -501,6 +547,13 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
                     chess.attach(steps_representation->possible_steps[sz-1]);
                     // delete tempc;
                 }
+            }
+            else if (a == -1)
+            {
+                RedCross* temprc = new RedCross{chess[pos.x][pos.y].center(), chess};
+                steps_representation->disabled_steps.push_back(temprc);
+                int sz = steps_representation->disabled_steps.size();
+                chess.attach(steps_representation->disabled_steps[sz-1]);
             }
         }
     }
@@ -557,7 +610,7 @@ int Bishop::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king
                 c2.attach_figure(*tmp);
                 chess.attach(*tmp);
             }
-            return false;
+            return -1;
         }
         else
         {
@@ -602,7 +655,8 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
 {
     while (!chess.out_of_range(Coordinate{char(x), y}))
     {
-        if (correct_step(chess[x0][y0], chess[x][y], chess))
+        int a = correct_step(chess[x0][y0], chess[x][y], chess);
+        if (a > 0)
         {
             if (chess[x][y].has_figure())
             {
@@ -622,6 +676,13 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
                 int sz = steps_representation->possible_steps.size();
                 chess.attach(steps_representation->possible_steps[sz-1]);
             }
+        }
+        else if (a == -1)
+        {
+            RedCross* temprc = new RedCross{chess[x][y].center(), chess};
+            steps_representation->disabled_steps.push_back(temprc);
+            int sz = steps_representation->disabled_steps.size();
+            chess.attach(steps_representation->disabled_steps[sz-1]);
         }
         x += d1;
         y += d2;
@@ -711,7 +772,7 @@ int Queen::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_
                 c2.attach_figure(*tmp);
                 chess.attach(*tmp);
             }
-            return false;
+            return -1;
         }
         else
         {
@@ -750,7 +811,8 @@ void Queen::horisontal_possible_steps(Coordinate& position, Chessboard& chess, V
     {
         for (int i = position.x + d; i != a_ascii - 1 + (4.5 + 4.5 * d); i += d)
         {
-            if (correct_step(chess[position.x][position.y], chess[i][position.y], chess))
+            int a = correct_step(chess[position.x][position.y], chess[i][position.y], chess);
+            if (a > 0)
             {
                 if (chess[i][position.y].has_figure())
                 {
@@ -772,6 +834,13 @@ void Queen::horisontal_possible_steps(Coordinate& position, Chessboard& chess, V
                     // delete tempc;
                 }
             }
+            else if(a == -1)
+            {
+                RedCross* temprc = new RedCross{chess[i][position.y].center(), chess};
+                steps_representation->disabled_steps.push_back(temprc);
+                int sz = steps_representation->disabled_steps.size();
+                chess.attach(steps_representation->disabled_steps[sz-1]);
+            }
         }
     }
 }
@@ -783,7 +852,8 @@ void Queen::vertical_possible_steps(Coordinate& position, Chessboard& chess, Vis
     {
         for (int i = position.y + d; i != int(4.5 + 4.5 * d); i += d)
         {
-            if (correct_step(chess[position.x][position.y], chess[position.x][i], chess))
+            int a = correct_step(chess[position.x][position.y], chess[position.x][i], chess);
+            if (a > 0)
             {
                 if (chess[position.x][i].has_figure())
                 {
@@ -804,6 +874,13 @@ void Queen::vertical_possible_steps(Coordinate& position, Chessboard& chess, Vis
                     chess.attach(steps_representation->possible_steps[sz-1]);
                     // delete tempc;
                 }
+            }
+            else if (a == -1)
+            {
+                RedCross* temprc = new RedCross{chess[position.x][i].center(), chess};
+                steps_representation->disabled_steps.push_back(temprc);
+                int sz = steps_representation->disabled_steps.size();
+                chess.attach(steps_representation->disabled_steps[sz-1]);
             }
         }
     }
@@ -830,7 +907,8 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
 {
     while (!chess.out_of_range(Coordinate{char(x), y}))
     {
-        if (correct_step(chess[x0][y0], chess[x][y], chess))
+        int a = correct_step(chess[x0][y0], chess[x][y], chess);
+        if (a > 0)
         {
             if (chess[x][y].has_figure())
             {
@@ -850,6 +928,13 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
                 int sz = steps_representation->possible_steps.size();
                 chess.attach(steps_representation->possible_steps[sz-1]);
             }
+        }
+        else if(a == -1)
+        {
+            RedCross* temprc = new RedCross{chess[x][y].center(), chess};
+            steps_representation->disabled_steps.push_back(temprc);
+            int sz = steps_representation->disabled_steps.size();
+            chess.attach(steps_representation->disabled_steps[sz-1]);
         }
         x += d1;
         y += d2;
@@ -885,7 +970,7 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                 c2.attach_figure(*tmp);
                 chess.attach(*tmp);
             }
-            return false;
+            return -1;
         }
         else
         {
@@ -908,7 +993,8 @@ VisualSteps* King::show_possible_steps(Coordinate position, Chessboard& chess)
     for (int i = a_ascii; i < a_ascii + chess.N; i++)
         for (int j = 1; j <= chess.N; j++)
         {
-            if (correct_step(chess[position.x][position.y], chess[i][j], chess))
+            int a = correct_step(chess[position.x][position.y], chess[i][j], chess);
+            if (a > 0)
             {
                 if (chess[i][j].has_figure())
                 {
@@ -926,6 +1012,13 @@ VisualSteps* King::show_possible_steps(Coordinate position, Chessboard& chess)
                     int sz = steps_representation->possible_steps.size();
                     chess.attach(steps_representation->possible_steps[sz-1]);
                 }
+            }
+            else if (a == -1)
+            {
+                RedCross* temprc = new RedCross{chess[i][j].center(), chess};
+                steps_representation->disabled_steps.push_back(temprc);
+                int sz = steps_representation->disabled_steps.size();
+                chess.attach(steps_representation->disabled_steps[sz-1]);
             }
         }
     return steps_representation;

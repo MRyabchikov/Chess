@@ -216,7 +216,7 @@ void Chessboard::clicked(Cell& c)
         if (selected->has_figure())
         {
             int a = selected->get_figure().correct_step(*selected, c, *this);
-            if (a)
+            if (a > 0)
             {
                 // if()
                 //  move_figure
@@ -234,7 +234,7 @@ void Chessboard::clicked(Cell& c)
                     detach(c.detach_figure());            // убираем фигуру врага
                     c.attach_figure(c1.detach_figure());  // переносим свою
                 }
-                else if (1 <= y + b && y + b < 7 && (*this)[x][y + b].has_figure() && (a == 2 || a == 3))
+                else if (1 <= y + b && y + b <= N && (*this)[x][y + b].has_figure() && (a == 2 || a == 3))
                 {
                     detach((*this)[x][y + b].detach_figure());  // *this = chess
                     (*this)[x][y].attach_figure(c1.detach_figure());
@@ -246,6 +246,26 @@ void Chessboard::clicked(Cell& c)
 
                 step_swap();
                 reset_double_steps();
+
+                
+                if(!is_check() && !is_mate())
+                {
+                    delete check_sign;
+                    check_sign = nullptr;
+                }
+                if(is_check() && !is_mate())
+                {
+                    if(check_sign == nullptr)
+                    {
+                        check_sign = new DangerSign{find_king(step_chooser)->center(), *this};
+                        this->attach(*check_sign);
+                    }
+                }
+                if(is_check() && is_mate())
+                {
+                    show_ending_message();
+                    step_chooser = none;
+                }
             }
         }
 
@@ -260,22 +280,6 @@ void Chessboard::clicked(Cell& c)
         selected = nullptr;
 
         //std::cout << (is_mate() ? "YES!\n" : "NO!\n");
-
-        if(!is_check() && !is_mate())
-        {
-            delete check_sign;
-            check_sign = nullptr;
-        }
-        if(is_check() && !is_mate())
-        {
-            check_sign = new DangerSign{find_king(step_chooser)->center(), *this};
-            this->attach(*check_sign);
-        }
-        if(is_check() && is_mate())
-        {
-            show_ending_message();
-            step_chooser = none;
-        }
     }
     Fl::redraw();
 }

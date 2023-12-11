@@ -76,6 +76,7 @@ struct VisualSteps
     ~VisualSteps();
     Vector_ref<Frame> possible_takes;
     Vector_ref<Circle> possible_steps;
+    Vector_ref<RedCross> disabled_steps;
 
   private:
     Chessboard* chess;
