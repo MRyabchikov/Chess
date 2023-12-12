@@ -17,6 +17,17 @@ struct Chessboard;
 
 constexpr int c_size = 80;  // couldn't find a way to get this constant from "cell.h"
 
+struct Detacher
+{
+    Detacher(Chessboard& chess_) : chess{&chess_} {}
+    ~Detacher() {}
+
+    void detach(Shape& fig);
+
+    private:
+        Chessboard* chess;
+};
+
 // Shape that represents a circle of circles, that fits into a cell (80*80 pixels)
 // Used when it's needed to highlight a check
 struct DangerSign : Circle
@@ -26,12 +37,12 @@ struct DangerSign : Circle
 
     void draw_lines () const override;
 
-  private:
-    static constexpr int circle_radius = 8;
+    private:
+        static constexpr int circle_radius = 8;
 
-    Chessboard* chess;
+        Detacher det;
 
-    Vector_ref<Circle> circle_of_circles;  // Please check for possible memory leaks
+        Vector_ref<Circle> circle_of_circles;  // Please check for possible memory leaks
 };
 
 struct RedCross : Rectangle
@@ -41,13 +52,12 @@ struct RedCross : Rectangle
 
     void draw_lines () const override;
 
-  private:
-    static constexpr int dist = 9;
+    private:
+        static constexpr int dist = 9;
 
-    Chessboard* chess;
+        Detacher det;
 
-    Closed_polyline* rectangle_1;
-    Closed_polyline* rectangle_2;
+        Vector_ref<Closed_polyline> rectangles;
 };
 
 // Shape that represents a frame, that fits into a cell (80*80 pixels)
@@ -59,25 +69,25 @@ struct Frame : Rectangle
 
     void draw_lines () const override;
 
-  private:
-    static constexpr int rc_width = 10;
-    static constexpr int rc_length = 30;
+    private:
+        static constexpr int rc_width = 10;
+        static constexpr int rc_length = 30;
 
-    Chessboard* chess;
-    Vector_ref<Rectangle> horisontal_rectangles;  // Please check for
-    Vector_ref<Rectangle> vertical_rectangles;    // possible memory leaks
+        Detacher det;
+        Vector_ref<Rectangle> horisontal_rectangles;  // Please check for
+        Vector_ref<Rectangle> vertical_rectangles;    // possible memory leaks
 };
 
 // Stores all shapes that represent all possible moves for currently clicked figure
 struct VisualSteps
 {
-    VisualSteps(Chessboard& chess_) : chess{&chess_} {}
+    VisualSteps(Chessboard& chess_) : det{chess_} {}
 
     ~VisualSteps();
     Vector_ref<Frame> possible_takes;
     Vector_ref<Circle> possible_steps;
     Vector_ref<RedCross> disabled_steps;
 
-  private:
-    Chessboard* chess;
+    private:
+        Detacher det;
 };

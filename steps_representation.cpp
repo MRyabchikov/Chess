@@ -2,7 +2,11 @@
 #include "board.h"
 
 
-DangerSign::DangerSign(Point center, Chessboard& chess_) : Circle{center, c_size/2}
+
+void Detacher::detach(Shape& fig) { chess->detach(fig); }
+
+
+DangerSign::DangerSign(Point center, Chessboard& chess_) : Circle{center, c_size/2}, det{chess_}
 {
     for(int i = center.x - c_size/4; i <= center.x + c_size/4; i += c_size/2)
     {
@@ -28,8 +32,6 @@ DangerSign::DangerSign(Point center, Chessboard& chess_) : Circle{center, c_size
         circle_of_circles[circle_of_circles.size()-1].set_fill_color(Graph_lib::Color::red);
         circle_of_circles[circle_of_circles.size()-1].set_color(Graph_lib::Color::red);
     }
-
-    chess = &chess_;
 }
 
 //I am very unsure of this destructor
@@ -38,9 +40,9 @@ DangerSign::~DangerSign()
     for(int i = (int)circle_of_circles.size() - 1; i >= 0; i--)
     {
         //Graph_lib::Circle::~Circle();
-        chess->detach(circle_of_circles[i]);
+        det.detach(circle_of_circles[i]);
     }
-    chess->detach(*this);
+    det.detach(*this);
 }
 
 void DangerSign::draw_lines() const
@@ -49,42 +51,41 @@ void DangerSign::draw_lines() const
         circle_of_circles[i].draw_lines();
 }
 
-RedCross::RedCross(Point center, Chessboard& chess_) : Rectangle{center, c_size, c_size}
+RedCross::RedCross(Point center, Chessboard& chess_) : Rectangle{center, c_size, c_size}, det{chess_}
 {
     int x = center.x;
     int y = center.y;
 
-    rectangle_1 = new Closed_polyline{{x - c_size/2 + 2*dist, y - c_size/2 + dist},{x + c_size/2 - dist, y + c_size/2 - 2*dist},
+    Closed_polyline* rectangle_1 = new Closed_polyline{{x - c_size/2 + 2*dist, y - c_size/2 + dist},{x + c_size/2 - dist, y + c_size/2 - 2*dist},
                                       {x + c_size/2 - 2*dist, y + c_size/2 - dist}, {x - c_size/2 + dist, y - c_size/2 + 2*dist}};
     rectangle_1->set_color(Graph_lib::Color::red);
     rectangle_1->set_fill_color(Graph_lib::Color::red);
 
-    rectangle_2 = new Closed_polyline{{x + c_size/2 - 2*dist, y - c_size/2 + dist},{x + c_size/2 - dist, y - c_size/2 + 2*dist},
+    Closed_polyline* rectangle_2 = new Closed_polyline{{x + c_size/2 - 2*dist, y - c_size/2 + dist},{x + c_size/2 - dist, y - c_size/2 + 2*dist},
                                       {x - c_size/2 + 2*dist, y + c_size/2 - dist},{x - c_size/2 + dist, y + c_size/2 - 2*dist}};
     rectangle_2->set_color(Graph_lib::Color::red);
     rectangle_2->set_fill_color(Graph_lib::Color::red);
 
-    chess = &chess_;
+    rectangles.push_back(rectangle_1);
+    rectangles.push_back(rectangle_2);
 }
 
 RedCross::~RedCross()
 {
     //Graph_lib::Rectangle::~Rectangle();
-    chess->detach(*rectangle_1);
-    delete rectangle_1;
-    chess->detach(*rectangle_2);
-    delete rectangle_2;
-    chess->detach(*this);
+    det.detach(rectangles[0]);
+    det.detach(rectangles[1]);
+    det.detach(*this);
 }
 
 void RedCross::draw_lines() const
 {
-    rectangle_1->draw_lines();
-    rectangle_2->draw_lines();
+    rectangles[0].draw_lines();
+    rectangles[1].draw_lines();
 }
 
 Frame::Frame(Point center, Chessboard& chess_) : 
-    Rectangle({center.x - c_size/2, center.y - c_size/2}, c_size, c_size)
+    Rectangle({center.x - c_size/2, center.y - c_size/2}, c_size, c_size), det{chess_}
 {
 
     Rectangle* h_r1 = new Rectangle{{center.x - c_size/2, center.y - c_size/2}, rc_width, rc_length};
@@ -118,8 +119,6 @@ Frame::Frame(Point center, Chessboard& chess_) :
         vertical_rectangles[i].set_color(chess_yellow);
         vertical_rectangles[i].set_fill_color(chess_yellow);
     }
-
-    chess = &chess_;
 }
 
 //I am very unsure of this destructor
@@ -128,10 +127,10 @@ Frame::~Frame()
     for(int i = (int)horisontal_rectangles.size() - 1; i >= 0; i--)
     {
         //Graph_lib::Rectangle::~Rectangle();
-        chess->detach(horisontal_rectangles[i]);
-        chess->detach(vertical_rectangles[i]);
+        det.detach(horisontal_rectangles[i]);
+        det.detach(vertical_rectangles[i]);
     }
-    chess->detach(*this);
+    det.detach(*this);
 }
 
 void Frame::draw_lines() const
@@ -147,5 +146,5 @@ void Frame::draw_lines() const
 VisualSteps::~VisualSteps()
 {
     for(int i = int(possible_steps.size() - 1); i >= 0; i--)
-        chess->detach(possible_steps[i]);
+        det.detach(possible_steps[i]);
 }
