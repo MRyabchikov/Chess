@@ -2,6 +2,7 @@
 
 // #include "cell.h"
 #include "steps_representation.h"
+#include <array>
 #include <Graph_lib/Graph.h>
 #include <Graph_lib/Simple_window.h>
 
@@ -93,15 +94,17 @@ struct Pawn : Figure
 
     void reset_double_step () override;
 
-    private:
-        bool double_step;
-        int steps_till_reset;
-        bool first_step;
+    // private:
+
+    bool double_step;
+    int steps_till_reset;
+    bool first_step;
 };
 
 struct King : Figure
 {
-    King(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "images/wK.png" : "images/bK.png"){};
+    King(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "images/wK.png" : "images/bK.png"),
+    can_do_castling{true}, possible_castlings{false, false, false, false} {};
 
     int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true /*false*/) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
@@ -111,8 +114,20 @@ struct King : Figure
 
     bool can_take_king (Chessboard& chess, Cell& king_position) override
     {
-        return correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false);
+        bool can_do_castling_reserved = can_do_castling;
+        bool returning_value = (correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false) > 0);
+        can_do_castling = can_do_castling_reserved;
+        return returning_value;
     }
+
+    std::array<bool, 4> castlings () { return possible_castlings; }
+
+    bool can_do_castling;
+
+    private:
+
+        std::array<bool, 4> possible_castlings; 
+
 };
 
 struct Bishop : Figure
@@ -128,7 +143,7 @@ struct Bishop : Figure
 
     bool can_take_king (Chessboard& chess, Cell& king_position) override
     {
-        return correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false);
+        return (correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false) > 0);
     }
     private:
         // HF - help function
@@ -151,7 +166,7 @@ struct Knight : Figure
     bool is_king () override { return false; }
     bool can_take_king (Chessboard& chess, Cell& king_position) override
     {
-        return correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false);
+        return (correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false) > 0);
     }
 };
 
@@ -168,7 +183,7 @@ struct Queen : Figure
 
     bool can_take_king (Chessboard& chess, Cell& king_position) override
     {
-        return correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false);
+        return (correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false) > 0);
     }
 
     private:
@@ -182,7 +197,8 @@ struct Queen : Figure
 
 struct Rook : Figure
 {
-    Rook(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "images/wR.png" : "images/bR.png"){};
+    Rook(Graph_lib::Window& win, Figure::Type color) : Figure(win, color, color == Type::white ? "images/wR.png" : "images/bR.png"),
+    can_do_castling{true} {};
 
     int correct_step (Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe = true /*false*/) override;
     VisualSteps* show_possible_steps (Coordinate position, Chessboard& chess) override;
@@ -192,10 +208,18 @@ struct Rook : Figure
 
     bool can_take_king (Chessboard& chess, Cell& king_position) override
     {
-        return correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false);
+        bool can_do_castling_reserved = can_do_castling;
+        bool returning_value = (correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false) > 0);
+        can_do_castling = can_do_castling_reserved;
+        return returning_value;
     }
 
+    bool castling () { return can_do_castling; }
+
+    bool can_do_castling;
+
     private:
+
         void horisontal_possible_steps (Coordinate& position, Chessboard& chess, VisualSteps*& steps_representation);
         void vertical_possible_steps (Coordinate& position, Chessboard& chess, VisualSteps*& steps_representation);
 };

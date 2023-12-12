@@ -68,6 +68,10 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                         // else - blacks' turn.
     int returning_value = 0;
 
+    bool first_step_reserved = first_step;
+    bool double_step_reserved = double_step;
+    int steps_till_reset_reserved = steps_till_reset;
+
     if (is_white())
         decider = 1;  // For some reason ternary operator didn't work so
     else              // I had to set 'decider' value the old-fashioned way
@@ -82,7 +86,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
     int x2 = int(c2.location().x);
     int y2 = c2.location().y;
 
-    if ((a_ascii <= x1 - 1 && x1 - 1 <= a_ascii + 7) &&
+    if ((a_ascii <= x1 - 1 && x1 - 1 < a_ascii + chess.N) &&
         chess[x1 - 1][y1].has_figure() && chess[x1 - 1][y1].get_figure().is_pawn() &&
         chess[x1][y1].get_figure().is_black() != chess[x1 - 1][y1].get_figure().is_black() &&
         chess[x1 - 1][y1].get_figure().double_step0() && (x2 == x1 - 1) && (y2 == y1 + decider))
@@ -90,7 +94,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         first_step = false;
         returning_value = 2;
     }
-    else if ((a_ascii <= x1 + 1 && x1 + 1 <= a_ascii + 7) &&
+    else if ((a_ascii <= x1 + 1 && x1 + 1 < a_ascii + chess.N) &&
              chess[x1 + 1][y1].has_figure() && chess[x1 + 1][y1].get_figure().is_pawn() &&
              chess[x1][y1].get_figure().is_black() != chess[x1 + 1][y1].get_figure().is_black() &&
              chess[x1 + 1][y1].get_figure().double_step0() && (x2 == x1 + 1) && (y2 == y1 + decider))
@@ -162,6 +166,11 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                 c2.attach_figure(*tmp);
                 chess.attach(*tmp);
             }
+
+            first_step = first_step_reserved;
+            double_step = double_step_reserved;
+            steps_till_reset = steps_till_reset_reserved;
+
             return -1;
         }
         else
@@ -189,7 +198,7 @@ bool Pawn::can_take_king (Chessboard& chess, Cell& king_position)
     first_step = first_step_reserved;
     double_step = double_step_reserved;
     steps_till_reset = steps_till_reset_reserved;
-    return returning_value;
+    return (returning_value > 0);
 }
 
 VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  // moves on the board
@@ -288,6 +297,8 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
     int x2 = int(c2.location().x);
     int y2 = c2.location().y;
 
+    bool can_do_castling_reserved = can_do_castling;
+
     if ((x1 != x2) && (y1 != y2))
         return false;
     if ((x1 == x2) && (y1 == y2))
@@ -316,7 +327,11 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             return false;
     }
     if (ensure_king_is_safe == false)
+    {
+        can_do_castling = false;
+
         return true;
+    }
     else
     {
         bool has_deleted_figure = false;
@@ -336,6 +351,9 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                 c2.attach_figure(*tmp);
                 chess.attach(*tmp);
             }
+
+            can_do_castling = can_do_castling_reserved;
+
             return -1;
         }
         else
@@ -346,6 +364,8 @@ int Rook::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                 c2.attach_figure(*tmp);
                 chess.attach(*tmp);
             }
+            can_do_castling = false;
+
             return true;
         }
     }
@@ -363,12 +383,17 @@ VisualSteps* Rook::show_possible_steps(Coordinate position, Chessboard& chess)
 
 void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps*& steps_representation)
 {
+
+    bool can_do_castling_reserved = can_do_castling;
+
     // d is made to reduce copy + paste
     for (int d = -1; d <= 1; d += 2)
     {
         for (int i = position.x + d; i != a_ascii - 1 + (4.5 + 4.5 * d); i += d)
         {
             int a = correct_step(chess[position.x][position.y], chess[i][position.y], chess);
+
+            can_do_castling = can_do_castling_reserved;
             if (a > 0)
             {
                 if (chess[i][position.y].has_figure())
@@ -404,12 +429,17 @@ void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, Vi
 
 void Rook::vertical_possible_steps(Coordinate& position, Chessboard& chess, VisualSteps*& steps_representation)
 {
+
+    bool can_do_castling_reserved = can_do_castling;
+
     // d is made to reduce copy + paste
     for (int d = -1; d <= 1; d += 2)
     {
         for (int i = position.y + d; i != int(4.5 + 4.5 * d); i += d)
         {
             int a = correct_step(chess[position.x][position.y], chess[position.x][i], chess);
+
+            can_do_castling = can_do_castling_reserved;
             if (a > 0)
             {
                 if (chess[position.x][i].has_figure())
@@ -943,14 +973,61 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
 
 int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_is_safe)
 {
+    bool dlsc = false; // did_left_short_castling
+    bool dllc = false; // did_left_long_castling
+    bool drsc = false; // did_right_short_castling
+    bool drlc = false; // did_right_long_castling
+
+    bool can_do_castling_reserved = can_do_castling;
+
     int x1 = int(c1.location().x), x2 = int(c2.location().x);
     int y1 = c1.location().y, y2 = c2.location().y;
-    if (!(abs(x2 - x1) <= 1 && abs(y2 - y1) <= 1) || (x2 == x1 && y1 == y2))
+
+    if(can_do_castling)
+    {
+        for(int d = -1; d <= 1; d += 2) // d - decider, for less copy + paste
+        {
+            if(a_ascii <= x1+d && x1+d < a_ascii + chess.N && a_ascii <= x1+2*d && x1+2*d < a_ascii + chess.N &&
+               x2-x1 == 2*d && y2 == y1 && !chess[x1+d][y1].has_figure() && !chess[x1+2*d][y1].has_figure())
+            {
+                if(a_ascii <= x1+3*d && x1+3*d < a_ascii + chess.N && chess[x1+3*d][y1].has_figure() &&
+                   is_white() == chess[x1+3*d][y1].get_figure().is_white() &&
+                   chess[x1+3*d][y1].get_figure().is_rook() && dynamic_cast<Rook*>(&(chess[x1+3*d][y1].get_figure()))->castling())
+                {
+                    // chess[x1+d][y1].attach_figure(chess[x1+3*d][y1].detach_figure());
+                    if(d == -1)
+                        dlsc = true;
+                    else if(d == 1)
+                        drsc = true;
+                    can_do_castling = false;
+                }
+                else if(a_ascii <= x1+4*d && x1+4*d < a_ascii + chess.N && a_ascii <= x1+3*d && x1+3*d < a_ascii + chess.N &&
+                        chess[x1+4*d][y1].has_figure() && chess[x1+4*d][y1].get_figure().is_rook() &&
+                        is_white() == chess[x1+4*d][y1].get_figure().is_white() &&
+                        !chess[x1+3*d][y1].has_figure() && dynamic_cast<Rook*>(&(chess[x1+4*d][y1].get_figure()))->castling())
+                {
+                    // chess[x1+d][y1].attach_figure(chess[x1+3*d][y1].detach_figure());
+                    if(d == -1)
+                        dllc = true;
+                    else if(d == 1)
+                        drlc = true;
+                    can_do_castling = false;
+                }
+            }
+        }
+    }
+    if ((can_do_castling == can_do_castling_reserved) &&
+        !(abs(x2 - x1) <= 1 && abs(y2 - y1) <= 1) || (x2 == x1 && y1 == y2))
         return false;
     if (change_pos_decider(c2) == false)
         return false;
+
+    can_do_castling = false;
+    possible_castlings = {dlsc, dllc, drsc, drlc};
+
     if (ensure_king_is_safe == false)
         return true;
+
     else
     {
         bool has_deleted_figure = false;
@@ -962,6 +1039,16 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
             has_deleted_figure = true;
         }
         c2.attach_figure(c1.detach_figure());
+
+        if (dlsc)
+            chess[x1-1][y1].attach_figure(chess[x1-3][y1].detach_figure());
+        else if (dllc)
+            chess[x1-1][y1].attach_figure(chess[x1-4][y1].detach_figure());
+        else if (drsc)
+            chess[x1+1][y1].attach_figure(chess[x1+3][y1].detach_figure());
+        else if (drlc)
+            chess[x1+1][y1].attach_figure(chess[x1+4][y1].detach_figure());
+
         if (king_is_under_attack(chess, c2.get_figure().is_white()))
         {
             c1.attach_figure(c2.detach_figure());
@@ -970,6 +1057,18 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                 c2.attach_figure(*tmp);
                 chess.attach(*tmp);
             }
+
+            if (dlsc)
+                chess[x1-3][y1].attach_figure(chess[x1-1][y1].detach_figure());
+            else if (dllc)
+                chess[x1-4][y1].attach_figure(chess[x1-1][y1].detach_figure());
+            else if( drsc)
+                chess[x1+3][y1].attach_figure(chess[x1+1][y1].detach_figure());
+            else if (drlc)
+                chess[x1+4][y1].attach_figure(chess[x1+1][y1].detach_figure());
+            
+            can_do_castling = can_do_castling_reserved;
+
             return -1;
         }
         else
@@ -980,6 +1079,16 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                 c2.attach_figure(*tmp);
                 chess.attach(*tmp);
             }
+
+            if (dlsc)
+                chess[x1-3][y1].attach_figure(chess[x1-1][y1].detach_figure());
+            else if (dllc)
+                chess[x1-4][y1].attach_figure(chess[x1-1][y1].detach_figure());
+            else if( drsc)
+                chess[x1+3][y1].attach_figure(chess[x1+1][y1].detach_figure());
+            else if (drlc)
+                chess[x1+4][y1].attach_figure(chess[x1+1][y1].detach_figure());
+
             return true;
         }
     }
@@ -990,10 +1099,16 @@ VisualSteps* King::show_possible_steps(Coordinate position, Chessboard& chess)
 {
     // I know it's less effective, but easier to read, maybe should be rewritten
     VisualSteps* steps_representation = new VisualSteps{chess};
+
+    bool can_do_castling_reserved = can_do_castling;
+
     for (int i = a_ascii; i < a_ascii + chess.N; i++)
         for (int j = 1; j <= chess.N; j++)
         {
             int a = correct_step(chess[position.x][position.y], chess[i][j], chess);
+
+            can_do_castling = can_do_castling_reserved;
+
             if (a > 0)
             {
                 if (chess[i][j].has_figure())
@@ -1021,6 +1136,7 @@ VisualSteps* King::show_possible_steps(Coordinate position, Chessboard& chess)
                 chess.attach(steps_representation->disabled_steps[sz-1]);
             }
         }
+
     return steps_representation;
 }
 

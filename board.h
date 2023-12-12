@@ -65,7 +65,11 @@ struct Chessboard : MyWindow
 
     bool out_of_range (Coordinate pos);
 
-    bool is_stalemate (step_color stalemate_candidate) { return true; }
+    bool is_stalemate();
+
+    bool is_check();
+
+    bool is_mate();
 
     private:
 
@@ -111,11 +115,8 @@ struct Chessboard : MyWindow
 
         void reset_double_steps();
 
-        bool is_check();
-
-        bool is_mate();
-
-        void show_ending_message();
+        void show_checkmate_message();
+        void show_stalemate_message();
 
         Graph_lib::Marks x_labels;
         Graph_lib::Marks y_labels;
