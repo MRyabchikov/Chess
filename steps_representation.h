@@ -15,7 +15,43 @@ using Graph_lib::Shape;
 
 struct Chessboard;
 
-constexpr int c_size = 80;  // couldn't find a way to get this constant from "cell.h"
+constexpr int c_size = 80;
+
+/*
+template<typename T>
+struct Resource_manager
+{
+    Resource_manager(Chessboard& chess_);
+    ~Resource_manager(Chessboard& chess_);
+
+    void push_back(T* shape);
+    void push_back(T& shape);
+
+    private:
+        Vector_ref<T> shapes;
+        Chessboard* chess;
+};
+*/
+
+template<typename T>
+struct Unique_attacher
+{
+    Unique_attacher(T* object_, Chessboard& chess_);
+    Unique_attacher(const T&);
+    Unique_attacher& operator=(const T&);
+    ~Unique_attacher();
+    T& obj();
+
+    void draw_lines() const;
+    void set_color(int color) const;
+    void set_fill_color(int color) const;
+
+    private:
+        T* object;
+        Chessboard* chess;
+};
+
+
 
 struct Detacher
 {
@@ -35,14 +71,14 @@ struct DangerSign : Circle
     DangerSign(Point center, Chessboard& chess_);
     ~DangerSign();
 
-    void draw_lines () const override;
+    void draw_lines() const override;
 
     private:
         static constexpr int circle_radius = 8;
 
         Detacher det;
 
-        Vector_ref<Circle> circle_of_circles;  // Please check for possible memory leaks
+        Vector_ref<Circle> circle_of_circles;
 };
 
 struct RedCross : Rectangle
@@ -50,7 +86,7 @@ struct RedCross : Rectangle
     RedCross(Point center, Chessboard& chess_);
     ~RedCross();
 
-    void draw_lines () const override;
+    void draw_lines() const override;
 
     private:
         static constexpr int dist = 9;
@@ -65,17 +101,22 @@ struct RedCross : Rectangle
 struct Frame : Rectangle
 {
     Frame(Point center, Chessboard& chess_);
-    ~Frame();
+    // ~Frame();
 
-    void draw_lines () const override;
+    void draw_lines() const override;
 
     private:
         static constexpr int rc_width = 10;
         static constexpr int rc_length = 30;
 
+        /*
         Detacher det;
-        Vector_ref<Rectangle> horisontal_rectangles;  // Please check for
-        Vector_ref<Rectangle> vertical_rectangles;    // possible memory leaks
+        Vector_ref<Rectangle> horisontal_rectangles;
+        Vector_ref<Rectangle> vertical_rectangles;
+        */
+
+       std::vector<Unique_attacher<Rectangle>> horisontal_rectangles;
+       std::vector<Unique_attacher<Rectangle>> vertical_rectangles;
 };
 
 // Stores all shapes that represent all possible moves for currently clicked figure
@@ -84,9 +125,11 @@ struct VisualSteps
     VisualSteps(Chessboard& chess_) : det{chess_} {}
 
     ~VisualSteps();
-    Vector_ref<Frame> possible_takes;
+    // Vector_ref<Frame> possible_takes;
+    std::vector<Unique_attacher<Frame>> possible_takes;
     Vector_ref<Circle> possible_steps;
     Vector_ref<RedCross> disabled_steps;
+
 
     private:
         Detacher det;

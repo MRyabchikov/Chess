@@ -41,7 +41,7 @@ void Cell::attach_figure(Figure& ch)
 }
 
 //removed const and i don't know how it will turn out  
-/*const*/ Figure& Cell::get_figure()  // обязательно нужна проверка не нулевой ли указатель checker                     
+/*const*/ Figure& Cell::get_figure()  // check for nullptr required              
 { 
     return *figure;
 }
@@ -49,8 +49,7 @@ void Cell::attach_figure(Figure& ch)
 Coordinate Cell::location() const
 {
 
-    int N = 8;       //Couldn't find a way to properly use
-                     //the static constant from "board.h"
+    int N = 8;
 
     char x = char((loc.x - DFTBOF)/size + a_ascii);
     int y = N - (loc.y - DFTBOF)/size;

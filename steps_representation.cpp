@@ -2,9 +2,74 @@
 #include "board.h"
 
 
+template<typename T>
+Unique_attacher<T>::Unique_attacher(T* object_, Chessboard& chess_) : object{object_}, chess{&chess_}
+{
+    chess->attach(*object_);
+}
+
+template<typename T>
+Unique_attacher<T>::Unique_attacher(const T& ua)
+{
+    object = ua.object;
+    chess = ua.chess;
+    ua.object = nullptr;
+}
+
+template<typename T>
+Unique_attacher<T>::~Unique_attacher()
+{
+    if(object != nullptr)
+    {
+        chess->detach(*object);
+        delete object;
+    }
+}
+
+template<typename T>
+Unique_attacher<T>& Unique_attacher<T>::operator=(const T& ua)
+
+{
+    if(object != nullptr)
+    {
+        chess->detach(*object);
+        delete object;
+    }
+    object = ua.object;
+    chess = ua.chess;
+    ua.object = nullptr;
+}
+
+template<typename T>
+T& Unique_attacher<T>::obj()
+{
+    if(object != nullptr)
+        return *object;
+    return nullptr;
+}
+
+template<typename T>
+void Unique_attacher<T>::draw_lines() const
+{
+    if(object != nullptr)
+        object->draw_lines();
+}
+
+template<typename T>
+void Unique_attacher<T>::set_color(int color) const
+{
+    if(object != nullptr)
+        object->set_color(color);
+}
+
+template<typename T>
+void Unique_attacher<T>::set_fill_color(int color) const
+{
+    if(object != nullptr)
+        object->set_fill_color(color);
+}
 
 void Detacher::detach(Shape& fig) { chess->detach(fig); }
-
 
 DangerSign::DangerSign(Point center, Chessboard& chess_) : Circle{center, c_size/2}, det{chess_}
 {
@@ -34,14 +99,10 @@ DangerSign::DangerSign(Point center, Chessboard& chess_) : Circle{center, c_size
     }
 }
 
-//I am very unsure of this destructor
 DangerSign::~DangerSign()
 {
     for(int i = (int)circle_of_circles.size() - 1; i >= 0; i--)
-    {
-        //Graph_lib::Circle::~Circle();
         det.detach(circle_of_circles[i]);
-    }
     det.detach(*this);
 }
 
@@ -72,7 +133,6 @@ RedCross::RedCross(Point center, Chessboard& chess_) : Rectangle{center, c_size,
 
 RedCross::~RedCross()
 {
-    //Graph_lib::Rectangle::~Rectangle();
     det.detach(rectangles[0]);
     det.detach(rectangles[1]);
     det.detach(*this);
@@ -85,34 +145,82 @@ void RedCross::draw_lines() const
 }
 
 Frame::Frame(Point center, Chessboard& chess_) : 
-    Rectangle({center.x - c_size/2, center.y - c_size/2}, c_size, c_size), det{chess_}
+    Rectangle({center.x - c_size/2, center.y - c_size/2}, c_size, c_size)
 {
+    /*
+    Unique_attacher<Rectangle> h_r1{new Rectangle{{center.x - c_size/2, center.y - c_size/2}, rc_width, rc_length}, chess_};
+    Unique_attacher<Rectangle> h_r2{new Rectangle{{center.x + c_size/2 - rc_width, center.y - c_size/2}, rc_width, rc_length}, chess_};
+    Unique_attacher<Rectangle> h_r3{new Rectangle{{center.x - c_size/2, center.y + c_size/2 - rc_length}, rc_width, rc_length}, chess_};
+    Unique_attacher<Rectangle> h_r4{new Rectangle{{center.x + c_size/2 - rc_width, center.y + c_size/2 - rc_length}, rc_width, rc_length}, chess_};
+    */
 
     Rectangle* h_r1 = new Rectangle{{center.x - c_size/2, center.y - c_size/2}, rc_width, rc_length};
     Rectangle* h_r2 = new Rectangle{{center.x + c_size/2 - rc_width, center.y - c_size/2}, rc_width, rc_length};
     Rectangle* h_r3 = new Rectangle{{center.x - c_size/2, center.y + c_size/2 - rc_length}, rc_width, rc_length};
     Rectangle* h_r4 = new Rectangle{{center.x + c_size/2 - rc_width, center.y + c_size/2 - rc_length}, rc_width, rc_length};
 
-    horisontal_rectangles.push_back(h_r1);
-    horisontal_rectangles.push_back(h_r2);
-    horisontal_rectangles.push_back(h_r3);
-    horisontal_rectangles.push_back(h_r4);
+    Unique_attacher<Rectangle> ua_h_r1{h_r1, chess_};
+    Unique_attacher<Rectangle> ua_h_r2{h_r2, chess_};
+    Unique_attacher<Rectangle> ua_h_r3{h_r3, chess_};
+    Unique_attacher<Rectangle> ua_h_r4{h_r4, chess_};
+
+    horisontal_rectangles.push_back(ua_h_r1);
+    horisontal_rectangles.push_back(ua_h_r2);
+    horisontal_rectangles.push_back(ua_h_r3);
+    horisontal_rectangles.push_back(ua_h_r4);
+
+    /*
+    horisontal_rectangles.emplace_back(h_r1, chess_);
+    horisontal_rectangles.emplace_back(h_r2, chess_);
+    horisontal_rectangles.emplace_back(h_r3, chess_);
+    horisontal_rectangles.emplace_back(h_r4, chess_);
+    */
 
     //There are probably ways to avoid Copy+Paste but there's 
     //something with Graph_lib that doesn't allow it to be easy
+
+    /*
+    Unique_attacher<Rectangle> v_r1{new Rectangle{{center.x - c_size/2, center.y - c_size/2}, rc_length, rc_width}, chess_};
+    Unique_attacher<Rectangle> v_r2{new Rectangle{{center.x + c_size/2 - rc_length, center.y - c_size/2}, rc_length, rc_width}, chess_};
+    Unique_attacher<Rectangle> v_r3{new Rectangle{{center.x - c_size/2, center.y + c_size/2 - rc_width}, rc_length, rc_width}, chess_};
+    Unique_attacher<Rectangle> v_r4{new Rectangle{{center.x + c_size/2 - rc_length, center.y + c_size/2 - rc_width}, rc_length, rc_width}, chess_};
+    */
 
     Rectangle* v_r1 = new Rectangle{{center.x - c_size/2, center.y - c_size/2}, rc_length, rc_width};
     Rectangle* v_r2 = new Rectangle{{center.x + c_size/2 - rc_length, center.y - c_size/2}, rc_length, rc_width};
     Rectangle* v_r3 = new Rectangle{{center.x - c_size/2, center.y + c_size/2 - rc_width}, rc_length, rc_width};
     Rectangle* v_r4 = new Rectangle{{center.x + c_size/2 - rc_length, center.y + c_size/2 - rc_width}, rc_length, rc_width};
 
-    vertical_rectangles.push_back(v_r1);
-    vertical_rectangles.push_back(v_r2);
-    vertical_rectangles.push_back(v_r3);
-    vertical_rectangles.push_back(v_r4);
+    Unique_attacher<Rectangle> ua_v_r1{v_r1, chess_};
+    Unique_attacher<Rectangle> ua_v_r2{v_r2, chess_};
+    Unique_attacher<Rectangle> ua_v_r3{v_r3, chess_};
+    Unique_attacher<Rectangle> ua_v_r4{v_r4, chess_};
+
+    vertical_rectangles.push_back(ua_v_r1);
+    vertical_rectangles.push_back(ua_v_r2);
+    vertical_rectangles.push_back(ua_v_r3);
+    vertical_rectangles.push_back(ua_v_r4);
+
+    /*
+    vertical_rectangles.emplace_back(v_r1, chess_);
+    vertical_rectangles.emplace_back(v_r2, chess_);
+    vertical_rectangles.emplace_back(v_r3, chess_);
+    vertical_rectangles.emplace_back(v_r4, chess_);
+    */
 
     for(int i = 0; i < 4; i++)
     {
+        /*
+        Rectangle& hr = (const_cast<Unique_attacher<Rectangle>*>(&horisontal_rectangles[i]))->obj();
+        Rectangle& vr = (const_cast<Unique_attacher<Rectangle>*>(&vertical_rectangles[i]))->obj();
+
+        hr.set_color(chess_yellow);
+        hr.set_fill_color(chess_yellow);
+
+        vr.set_color(chess_yellow);
+        vr.set_fill_color(chess_yellow);
+        */
+
         horisontal_rectangles[i].set_color(chess_yellow);
         horisontal_rectangles[i].set_fill_color(chess_yellow);
 
@@ -121,28 +229,35 @@ Frame::Frame(Point center, Chessboard& chess_) :
     }
 }
 
-//I am very unsure of this destructor
+/*
 Frame::~Frame()
 {
     for(int i = (int)horisontal_rectangles.size() - 1; i >= 0; i--)
     {
-        //Graph_lib::Rectangle::~Rectangle();
         det.detach(horisontal_rectangles[i]);
         det.detach(vertical_rectangles[i]);
     }
     det.detach(*this);
 }
+*/
 
 void Frame::draw_lines() const
 {
     for(int i = 0; i < 4; i++)
     {
-        horisontal_rectangles[i].draw_lines();
-        vertical_rectangles[i].draw_lines();
+        /*
+        Rectangle& hr = (const_cast<Unique_attacher<Rectangle>*>(&horisontal_rectangles[i]))->obj();
+        Rectangle& vr = (const_cast<Unique_attacher<Rectangle>*>(&vertical_rectangles[i]))->obj();
+
+        hr.draw_lines();
+        vr.draw_lines();
+        */
+
+       horisontal_rectangles[i].draw_lines();
+       vertical_rectangles[i].draw_lines();
     }
 }
 
-//I am very unsure of this destructor
 VisualSteps::~VisualSteps()
 {
     for(int i = int(possible_steps.size() - 1); i >= 0; i--)

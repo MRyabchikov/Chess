@@ -60,9 +60,6 @@ struct Chessboard : MyWindow
     // return a 1D array of values of a column of a 'c' coordinate
     Sub_Vector_ref operator[](char c);
 
-    // says for itself
-    Chessboard* deepcopy();
-
     bool out_of_range (Coordinate pos);
 
     bool is_stalemate();
