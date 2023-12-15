@@ -88,8 +88,8 @@ struct Chessboard : MyWindow
         Vector_ref<King> kings;
 
         Vector_ref<Text> texts;
-
-        DangerSign* check_sign = nullptr;
+        
+        AttachManager<DangerSign>* am_check_sign = nullptr;
 
         static void cb_clicked (Address, Address widget)
         {

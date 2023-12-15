@@ -21,11 +21,11 @@ link_directories(
 
 add_executable(
     ${TARGET}
+    main.cpp
     cell.cpp 
     board.cpp 
-    steps_representation.cpp
     figure.cpp
-    main.cpp
+    steps_representation.cpp
     ${LIB_DIR}/Graph_lib/Graph.cpp
     ${LIB_DIR}/Graph_lib/GUI.cpp
     ${LIB_DIR}/Graph_lib/Window.cpp

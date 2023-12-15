@@ -270,26 +270,26 @@ void Chessboard::clicked(Cell& c)
                 
                 if(!is_check() && !is_mate())
                 {
-                    if(check_sign != nullptr)
+                    if(am_check_sign != nullptr)
                     {
-                        delete check_sign;
-                        check_sign = nullptr;
+                        delete am_check_sign;
+                        am_check_sign = nullptr;
                     }
                 }
                 if(is_check() && !is_mate())
                 {
-                    if(check_sign == nullptr)
+                    if(am_check_sign == nullptr)
                     {
-                        check_sign = new DangerSign{find_king(step_chooser)->center(), *this};
-                        this->attach(*check_sign);
+                        DangerSign* check_sign = new DangerSign{find_king(step_chooser)->center(), *this};
+                        am_check_sign = new AttachManager<DangerSign>{check_sign, *this};
                     }
                 }
                 if(is_check() && is_mate())
                 {
-                    if(check_sign == nullptr)
+                    if(am_check_sign == nullptr)
                     {
-                        check_sign = new DangerSign{find_king(step_chooser)->center(), *this};
-                        this->attach(*check_sign);
+                        DangerSign* check_sign = new DangerSign{find_king(step_chooser)->center(), *this};
+                        am_check_sign = new AttachManager<DangerSign>{check_sign, *this};
                     }
                     show_checkmate_message();
                     step_chooser = none;
@@ -311,8 +311,6 @@ void Chessboard::clicked(Cell& c)
             all_possible_steps = nullptr;
         }
         selected = nullptr;
-
-        std::cout << (is_mate() ? "YES!\n" : "NO!\n");
     }
     Fl::redraw();
 }
