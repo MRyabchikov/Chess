@@ -12,7 +12,7 @@ struct ObjectValue
     int reference_count;
 };
 
-
+//A struct, that manages attaching and detaching of Graph_lib objects from Simple_window
 template<typename T>
 struct AttachManager
 {
@@ -42,8 +42,6 @@ struct AttachManager
         };
 
         ObjectValue* value;
-
-        // ObjectValue<T>* object;
 };
 
 template <typename T>
