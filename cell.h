@@ -55,14 +55,14 @@ struct Cell : Graph_lib::Button
 
     bool has_figure () const { return figure != nullptr; }
 
-    //removed const and i don't know how it will turn out
+    // removed const and i don't know how it will turn out
     /*const*/ Figure& get_figure ();  // обязательно нужна проверка не нулевой ли указатель checker
 
     Coordinate location() const; //gets pair {char x , int y} - coordinate of a cell
-  private:
+    private:
 
-    Type type;
-    void reset_color ();
-    Figure* figure{nullptr};
+        Type type;
+        void reset_color ();
+        Figure* figure{nullptr};
 
 };

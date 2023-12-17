@@ -16,7 +16,7 @@ MyWindow::MyWindow(Point xy, int w, int h, const std::string& title)
 }
 
 void MyWindow::cb_quit(Address, Address widget)
-{  // void*
+{   // void*
     auto& btn = Graph_lib::reference_to<Graph_lib::Button>(widget);
     dynamic_cast<MyWindow&>(btn.window()).quit();
 }
@@ -189,7 +189,7 @@ void Chessboard::standard_fill()
 }
 
 void Chessboard::clicked(Cell& c)
-{  // для шашек. Для всего остального удалить
+{   // для шашек. Для всего остального удалить
     // if (!c.is_black()) return; для контроля, кто должен ходить
     //  в c также лежит информация о том, стоит ли фигура на это клетке. (предположительно)
     //  если стоит, то has_checker() == true;
@@ -216,7 +216,7 @@ void Chessboard::clicked(Cell& c)
         if (selected->has_figure())
         {
             int a = selected->get_figure().correct_step(*selected, c, *this);
-            if (a)
+            if (a > 0)
             {
                 // if()
                 //  move_figure
@@ -226,7 +226,7 @@ void Chessboard::clicked(Cell& c)
                 int b;
                 if (step_chooser == black)
                     b = 1;
-                else
+                else if(step_chooser == white)
                     b = -1;
                 if (c.has_figure())
                 {
@@ -234,10 +234,30 @@ void Chessboard::clicked(Cell& c)
                     detach(c.detach_figure());            // убираем фигуру врага
                     c.attach_figure(c1.detach_figure());  // переносим свою
                 }
-                else if (1 <= y + b && y + b < 7 && (*this)[x][y + b].has_figure() && (a == 2 || a == 3))
+                else if (1 <= y + b && y + b <= 8 && (*this)[x][y + b].has_figure() && (a == 2 || a == 3))
                 {
                     detach((*this)[x][y + b].detach_figure());  // *this = chess
                     (*this)[x][y].attach_figure(c1.detach_figure());
+                }
+                else if(c1.get_figure().is_king())
+                {
+                    King* king_ptr = dynamic_cast<King*>(&c1.get_figure());
+
+                    std::array<bool, 4> temp_arr = king_ptr->castlings();
+
+                    int x1 = c1.location().x;
+                    int y1 = c1.location().y;
+
+                    if(temp_arr[0])
+                        (*this)[x1-1][y1].attach_figure((*this)[x1-3][y1].detach_figure());
+                    else if(temp_arr[1])
+                        (*this)[x1-1][y1].attach_figure((*this)[x1-4][y1].detach_figure());
+                    else if(temp_arr[2])
+                        (*this)[x1+1][y1].attach_figure((*this)[x1+3][y1].detach_figure());
+                    else if(temp_arr[3])
+                        (*this)[x1+1][y1].attach_figure((*this)[x1+4][y1].detach_figure());
+
+                    c.attach_figure(c1.detach_figure());
                 }
                 else
                 {
@@ -246,6 +266,39 @@ void Chessboard::clicked(Cell& c)
 
                 step_swap();
                 reset_double_steps();
+
+                
+                if(!is_check() && !is_mate())
+                {
+                    if(am_check_sign != nullptr)
+                    {
+                        delete am_check_sign;
+                        am_check_sign = nullptr;
+                    }
+                }
+                if(is_check() && !is_mate())
+                {
+                    if(am_check_sign == nullptr)
+                    {
+                        DangerSign* check_sign = new DangerSign{find_king(step_chooser)->center(), *this};
+                        am_check_sign = new AttachManager<DangerSign>{check_sign, *this};
+                    }
+                }
+                if(is_check() && is_mate())
+                {
+                    if(am_check_sign == nullptr)
+                    {
+                        DangerSign* check_sign = new DangerSign{find_king(step_chooser)->center(), *this};
+                        am_check_sign = new AttachManager<DangerSign>{check_sign, *this};
+                    }
+                    show_checkmate_message();
+                    step_chooser = none;
+                }
+                else if(is_stalemate())
+                {
+                    show_stalemate_message();
+                    step_chooser = none;
+                }
             }
         }
 
@@ -266,7 +319,9 @@ bool Chessboard::decide()
 {
     if (!selected->has_figure())
         return false;
-    if (step_chooser == step_color::white && selected->get_figure().is_black())
+    else if(step_chooser == step_color::none)
+        return false;
+    else if (step_chooser == step_color::white && selected->get_figure().is_black())
         return false;
     else if (step_chooser == step_color::black && selected->get_figure().is_white())
         return false;
@@ -300,100 +355,182 @@ Sub_Vector_ref Chessboard::operator[](char c)
     return subv;
 }
 
-Chessboard* Chessboard::deepcopy()
+bool Chessboard::is_check()
 {
-    Chessboard* chess = new Chessboard{Chessboard_location};
+    Cell* king_ptr = find_king(step_chooser);
 
-    //copying pawns
+    for(int i = a_ascii; i < a_ascii + N; i++)
+    {
+        for(int j = 1; j <= N; j++)
+        {
+            if(at(i,j).has_figure() &&
+               ((step_chooser == white && at(i,j).get_figure().is_black()) ||
+                (step_chooser == black && at(i,j).get_figure().is_white())))
+            {
+                if(at(i,j).get_figure().can_take_king(*this,*king_ptr))
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool Chessboard::is_mate()
+{
+
+    bool pawn_flag = false;
+
+    bool first_step_reserved;
+    bool double_step_reserved;
+    int steps_till_reset_reserved;
+
+    bool king_flag = false;
+    bool rook_flag = false;
+
+    bool can_do_castling_reserved;
+
+    for(int i = a_ascii; i < a_ascii + N; i++)
+    {
+        for(int j = 1; j <= N; j++)
+        {
+            if(at(i,j).has_figure() &&
+               ((step_chooser == white && at(i,j).get_figure().is_white()) ||
+                (step_chooser == black && at(i,j).get_figure().is_black())))
+            {
+                for(int i_ = a_ascii; i_ < a_ascii + N; i_++)
+                {
+                    for(int j_ = 1; j_ <= N; j_++)
+                    {
+                        if(at(i,j).get_figure().is_pawn())
+                        {
+                            pawn_flag = true;
+
+                            Pawn* pawn_fr = dynamic_cast<Pawn*>(&(at(i,j).get_figure()));
+
+                            first_step_reserved = pawn_fr->first_step;
+                            double_step_reserved = pawn_fr->double_step;
+                            steps_till_reset_reserved = pawn_fr->steps_till_reset;
+                        }
+                        if(at(i,j).get_figure().is_king())
+                        {
+                            king_flag = true;
+
+                            King* king_fr = dynamic_cast<King*>(&(at(i,j).get_figure()));
+
+                            can_do_castling_reserved = king_fr->can_do_castling;
+                        }
+                        if(at(i,j).get_figure().is_rook())
+                        {
+                            rook_flag = true;
+
+                            Rook* rook_fr = dynamic_cast<Rook*>(&(at(i,j).get_figure()));
+
+                            can_do_castling_reserved = rook_fr->can_do_castling;
+                        }
+
+                        bool cond = !(i == i_ && j == j_) && at(i,j).get_figure().correct_step(at(i,j), at(i_,j_), *this, true) > 0;
+
+                        if(pawn_flag)
+                        {
+                            Pawn* pawn_fr = dynamic_cast<Pawn*>(&(at(i,j).get_figure()));
+
+                            pawn_fr->first_step = first_step_reserved;
+                            pawn_fr->double_step = double_step_reserved;
+                            pawn_fr->steps_till_reset = steps_till_reset_reserved;
+                        }
+                        else if(king_flag)
+                        {
+                            King* king_fr = dynamic_cast<King*>(&(at(i,j).get_figure()));
+
+                            king_fr->can_do_castling = can_do_castling_reserved;
+                        }
+                        else if(rook_flag)
+                        {
+                            Rook* rook_fr = dynamic_cast<Rook*>(&(at(i,j).get_figure()));
+
+                            rook_fr->can_do_castling = can_do_castling_reserved;
+                        }
+
+                        pawn_flag = false;
+                        king_flag = false;
+                        rook_flag = false;
+
+                        if(cond)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+bool Chessboard::is_stalemate()
+{
+    bool big_statement = true;
+
     for(int i = 0; i < pawns.size(); i++)
-    {
-        Pawn* temp_pawn = pawns[i].deepcopy(*chess);
-        chess->pawns.push_back(temp_pawn);
-
         if(pawns[i].has_cell())
-        {
-            char tx = pawns[i].get_cell()->location().x;
-            int ty = pawns[i].get_cell()->location().y;
-            (*chess)[tx][ty].attach_figure(chess->pawns[chess->pawns.size()-1]);
-        }
-        else
-            chess->detach(chess->pawns[chess->pawns.size()-1]);
-    }
-    //copying kings
-    for(int i = 0; i < kings.size(); i++)
-    {
-        King* temp_king = kings[i].deepcopy(*chess);
-        chess->kings.push_back(temp_king);
-
-        if(kings[i].has_cell())
-        {
-            char tx = kings[i].get_cell()->location().x;
-            int ty = kings[i].get_cell()->location().y;
-            (*chess)[tx][ty].attach_figure(chess->kings[chess->kings.size()-1]);
-        }
-        else
-            chess->detach(chess->kings[chess->kings.size()-1]);
-    }
-    //copying bishops
-    for(int i = 0; i < bishops.size(); i++)
-    {
-        Bishop* temp_bishop = bishops[i].deepcopy(*chess);
-        chess->bishops.push_back(temp_bishop);
-
-        if(bishops[i].has_cell())
-        {
-            char tx = bishops[i].get_cell()->location().x;
-            int ty = bishops[i].get_cell()->location().y;
-            (*chess)[tx][ty].attach_figure(chess->bishops[chess->bishops.size()-1]);
-        }
-        else
-            chess->detach(chess->bishops[chess->bishops.size()-1]);
-    }
-    //copying knights
-    for(int i = 0; i < knights.size(); i++)
-    {
-        Knight* temp_knight = knights[i].deepcopy(*chess);
-        chess->knights.push_back(temp_knight);
-
-        if(knights[i].has_cell())
-        {
-            char tx = knights[i].get_cell()->location().x;
-            int ty = knights[i].get_cell()->location().y;
-            (*chess)[tx][ty].attach_figure(chess->knights[chess->knights.size()-1]);
-        }
-        else
-            chess->detach(chess->knights[chess->knights.size()-1]);
-    }
-    //copying queens
-    for(int i = 0; i < queens.size(); i++)
-    {
-        Queen* temp_queen = queens[i].deepcopy(*chess);
-        chess->queens.push_back(temp_queen);
-
-        if(queens[i].has_cell())
-        {
-            char tx = queens[i].get_cell()->location().x;
-            int ty = queens[i].get_cell()->location().y;
-            (*chess)[tx][ty].attach_figure(chess->queens[chess->queens.size()-1]);
-        }
-        else
-            chess->detach(chess->queens[chess->queens.size()-1]);
-    }
-    //copying rooks
+            big_statement = false;
     for(int i = 0; i < rooks.size(); i++)
-    {
-        Rook* temp_rook = rooks[i].deepcopy(*chess);
-        chess->rooks.push_back(temp_rook);
-
         if(rooks[i].has_cell())
+            big_statement = false;
+    for(int i = 0; i < knights.size(); i++)
+        if(knights[i].has_cell())
+            big_statement = false;
+    for(int i = 0; i < bishops.size(); i++)
+        if(bishops[i].has_cell())
+            big_statement = false;
+    for(int i = 0; i < queens.size(); i++)
+        if(queens[i].has_cell())
+            big_statement = false;
+    for(int i = 0; i < kings.size(); i++)
+        if(!(kings[i].has_cell()))
+            throw std::runtime_error("No king!");
+
+    return ((!is_check() && is_mate()) || big_statement);
+}
+
+void Chessboard::show_checkmate_message()
+{
+    std::string who_won = ((step_chooser == white) ? "BLACKS WON" : "WHITES WON");
+
+    Text* txt1 = new Text{Point{DFTBOF + 4*c_size - int(3*standard_font_size), DFTBOF + 4*c_size - standard_font_size},"CHECKMATE!"};
+    Text* txt2 = new Text{Point{DFTBOF + 4*c_size - int(3*standard_font_size), DFTBOF + 4*c_size}, who_won};
+    texts.push_back(txt1);
+    texts[texts.size()-1].set_font_size(standard_font_size);
+    this->attach(texts[texts.size()-1]);
+    texts.push_back(txt2);
+    texts[texts.size()-1].set_font_size(standard_font_size);
+    this->attach(texts[texts.size()-1]);
+}
+
+void Chessboard::show_stalemate_message()
+{
+    Text* txt = new Text{Point{DFTBOF + 4*c_size - int(5.5*standard_font_size), DFTBOF + 4*c_size}, "IT'S A STALEMATE!"};
+    texts.push_back(txt);
+    texts[texts.size()-1].set_font_size(standard_font_size);
+    this->attach(texts[texts.size()-1]);
+}
+
+Cell* Chessboard::find_king(step_color color)
+{
+    Cell* king_ptr = nullptr;
+
+    for(int i = a_ascii; i < a_ascii + N; i++)
+    {
+        for(int j = 1; j <= N; j++)
         {
-            char tx = rooks[i].get_cell()->location().x;
-            int ty = rooks[i].get_cell()->location().y;
-            (*chess)[tx][ty].attach_figure(chess->rooks[chess->rooks.size()-1]);
+            if(at(i,j).has_figure() && at(i,j).get_figure().is_king() &&
+               ((color == white) == at(i,j).get_figure().is_white()))
+            {
+                king_ptr = &(at(i,j));
+            }
         }
-        else
-            chess->detach(chess->rooks[chess->rooks.size()-1]);
     }
-    
-    return chess;
+    if(king_ptr == nullptr)
+        throw std::runtime_error("Chessboard::find_king(step_color color) : No king!");
+    return king_ptr;
 }

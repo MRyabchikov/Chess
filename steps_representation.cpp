@@ -2,90 +2,76 @@
 #include "board.h"
 
 
-DangerSign::DangerSign(Point center, Chessboard& chess_) : Circle{center, c_size/2}
+DangerSign::DangerSign(Point center, Simple_window& chess_) : Circle{center, c_size/2}
 {
     for(int i = center.x - c_size/4; i <= center.x + c_size/4; i += c_size/2)
     {
         for(int j = center.y - c_size/4; j <= center.y + c_size/4; j += c_size/2)
         {
             Circle* temporary_circle = new Circle{{i,j}, circle_radius};
-            temporary_circle->set_fill_color(Graph_lib::Color::red);
-            temporary_circle->set_color(Graph_lib::Color::red);
-            circle_of_circles.push_back(temporary_circle);
+            AttachManager<Circle> am_temporary_circle{temporary_circle, chess_};
+
+            circle_of_circles.push_back(am_temporary_circle);
+            circle_of_circles[circle_of_circles.size()-1].set_fill_color(Graph_lib::Color::red);
+            circle_of_circles[circle_of_circles.size()-1].set_color(Graph_lib::Color::red);
         }
     }
     for(int i = center.x - c_size/4 - c_size/8; i <= center.x + c_size/4 + c_size/8; i += c_size/4 + c_size/8)
     {
         Circle* temporary_circle = new Circle{{i,center.y}, circle_radius};
-        temporary_circle->set_fill_color(Graph_lib::Color::red);
-        temporary_circle->set_color(Graph_lib::Color::red);
-        circle_of_circles.push_back(temporary_circle);
+        AttachManager<Circle> am_temporary_circle{temporary_circle, chess_};
+
+        circle_of_circles.push_back(am_temporary_circle);
+        circle_of_circles[circle_of_circles.size()-1].set_fill_color(Graph_lib::Color::red);
+        circle_of_circles[circle_of_circles.size()-1].set_color(Graph_lib::Color::red);
     }
     for(int j = center.y - c_size/4 - c_size/8; j <= center.y + c_size/4 + c_size/8; j += c_size/2 + c_size/4)
     {
         Circle* temporary_circle = new Circle{{center.x,j}, circle_radius};
-        temporary_circle->set_fill_color(Graph_lib::Color::red);
-        temporary_circle->set_color(Graph_lib::Color::red);
-        circle_of_circles.push_back(temporary_circle);
-    }
+        AttachManager<Circle> am_temporary_circle{temporary_circle, chess_};
 
-    chess = &chess_;
-}
-
-//I am very unsure of this destructor
-DangerSign::~DangerSign()
-{
-    for(int i = (int)circle_of_circles.size() - 1; i >= 0; i--)
-    {
-        //Graph_lib::Circle::~Circle();
-        chess->detach(*circle_of_circles[i]);
-        delete circle_of_circles[i];
-        circle_of_circles.erase(circle_of_circles.begin()+i,circle_of_circles.begin()+i+1);
-        chess->detach(*this);
+        circle_of_circles.push_back(am_temporary_circle);
+        circle_of_circles[circle_of_circles.size()-1].set_fill_color(Graph_lib::Color::red);
+        circle_of_circles[circle_of_circles.size()-1].set_color(Graph_lib::Color::red);
     }
 }
 
 void DangerSign::draw_lines() const
 {
     for(int i = 0; i < int(circle_of_circles.size()); i++)
-        circle_of_circles[i]->draw_lines();
+        circle_of_circles[i].draw_lines();
 }
 
-RedCross::RedCross(Point center, Chessboard& chess_) : Rectangle{center, c_size, c_size}
+RedCross::RedCross(Point center, Simple_window& chess_) : Rectangle{center, c_size, c_size}
 {
     int x = center.x;
     int y = center.y;
 
-    rectangle_1 = new Closed_polyline{{x - c_size/2 + 2*dist, y - c_size/2 + dist},{x + c_size/2 - dist, y + c_size/2 - 2*dist},
+    Closed_polyline* rectangle_1 = new Closed_polyline{{x - c_size/2 + 2*dist, y - c_size/2 + dist},{x + c_size/2 - dist, y + c_size/2 - 2*dist},
                                       {x + c_size/2 - 2*dist, y + c_size/2 - dist}, {x - c_size/2 + dist, y - c_size/2 + 2*dist}};
-    rectangle_1->set_color(Graph_lib::Color::red);
-    rectangle_1->set_fill_color(Graph_lib::Color::red);
+    AttachManager<Closed_polyline> am_rectangle_1{rectangle_1, chess_};
 
-    rectangle_2 = new Closed_polyline{{x + c_size/2 - 2*dist, y - c_size/2 + dist},{x + c_size/2 - dist, y - c_size/2 + 2*dist},
+    am_rectangle_1.set_color(Graph_lib::Color::red);
+    am_rectangle_1.set_fill_color(Graph_lib::Color::red);
+
+    Closed_polyline* rectangle_2 = new Closed_polyline{{x + c_size/2 - 2*dist, y - c_size/2 + dist},{x + c_size/2 - dist, y - c_size/2 + 2*dist},
                                       {x - c_size/2 + 2*dist, y + c_size/2 - dist},{x - c_size/2 + dist, y + c_size/2 - 2*dist}};
-    rectangle_2->set_color(Graph_lib::Color::red);
-    rectangle_2->set_fill_color(Graph_lib::Color::red);
+    AttachManager<Closed_polyline> am_rectangle_2{rectangle_2, chess_};
 
-    chess = &chess_;
-}
+    am_rectangle_2.set_color(Graph_lib::Color::red);
+    am_rectangle_2.set_fill_color(Graph_lib::Color::red);
 
-RedCross::~RedCross()
-{
-    //Graph_lib::Rectangle::~Rectangle();
-    chess->detach(*rectangle_1);
-    delete rectangle_1;
-    chess->detach(*rectangle_2);
-    delete rectangle_2;
-    chess->detach(*this);
+    rectangles.push_back(am_rectangle_1);
+    rectangles.push_back(am_rectangle_2);
 }
 
 void RedCross::draw_lines() const
 {
-    rectangle_1->draw_lines();
-    rectangle_2->draw_lines();
+    rectangles[0].draw_lines();
+    rectangles[1].draw_lines();
 }
 
-Frame::Frame(Point center, Chessboard& chess_) : 
+Frame::Frame(Point center, Simple_window& chess_) : 
     Rectangle({center.x - c_size/2, center.y - c_size/2}, c_size, c_size)
 {
 
@@ -94,10 +80,15 @@ Frame::Frame(Point center, Chessboard& chess_) :
     Rectangle* h_r3 = new Rectangle{{center.x - c_size/2, center.y + c_size/2 - rc_length}, rc_width, rc_length};
     Rectangle* h_r4 = new Rectangle{{center.x + c_size/2 - rc_width, center.y + c_size/2 - rc_length}, rc_width, rc_length};
 
-    horisontal_rectangles.push_back(h_r1);
-    horisontal_rectangles.push_back(h_r2);
-    horisontal_rectangles.push_back(h_r3);
-    horisontal_rectangles.push_back(h_r4);
+    AttachManager<Rectangle> am_h_r1{h_r1, chess_};
+    AttachManager<Rectangle> am_h_r2{h_r2, chess_};
+    AttachManager<Rectangle> am_h_r3{h_r3, chess_};
+    AttachManager<Rectangle> am_h_r4{h_r4, chess_};
+
+    horisontal_rectangles.push_back(am_h_r1);
+    horisontal_rectangles.push_back(am_h_r2);
+    horisontal_rectangles.push_back(am_h_r3);
+    horisontal_rectangles.push_back(am_h_r4);
 
     //There are probably ways to avoid Copy+Paste but there's 
     //something with Graph_lib that doesn't allow it to be easy
@@ -107,10 +98,15 @@ Frame::Frame(Point center, Chessboard& chess_) :
     Rectangle* v_r3 = new Rectangle{{center.x - c_size/2, center.y + c_size/2 - rc_width}, rc_length, rc_width};
     Rectangle* v_r4 = new Rectangle{{center.x + c_size/2 - rc_length, center.y + c_size/2 - rc_width}, rc_length, rc_width};
 
-    vertical_rectangles.push_back(v_r1);
-    vertical_rectangles.push_back(v_r2);
-    vertical_rectangles.push_back(v_r3);
-    vertical_rectangles.push_back(v_r4);
+    AttachManager<Rectangle> am_v_r1{v_r1, chess_};
+    AttachManager<Rectangle> am_v_r2{v_r2, chess_};
+    AttachManager<Rectangle> am_v_r3{v_r3, chess_};
+    AttachManager<Rectangle> am_v_r4{v_r4, chess_};
+
+    vertical_rectangles.push_back(am_v_r1);
+    vertical_rectangles.push_back(am_v_r2);
+    vertical_rectangles.push_back(am_v_r3);
+    vertical_rectangles.push_back(am_v_r4);
 
     for(int i = 0; i < 4; i++)
     {
@@ -120,20 +116,6 @@ Frame::Frame(Point center, Chessboard& chess_) :
         vertical_rectangles[i].set_color(chess_yellow);
         vertical_rectangles[i].set_fill_color(chess_yellow);
     }
-
-    chess = &chess_;
-}
-
-//I am very unsure of this destructor
-Frame::~Frame()
-{
-    for(int i = (int)horisontal_rectangles.size() - 1; i >= 0; i--)
-    {
-        //Graph_lib::Rectangle::~Rectangle();
-        chess->detach(horisontal_rectangles[i]);
-        chess->detach(vertical_rectangles[i]);
-    }
-    chess->detach(*this);
 }
 
 void Frame::draw_lines() const
@@ -143,11 +125,4 @@ void Frame::draw_lines() const
         horisontal_rectangles[i].draw_lines();
         vertical_rectangles[i].draw_lines();
     }
-}
-
-//I am very unsure of this destructor
-VisualSteps::~VisualSteps()
-{
-    for(int i = int(possible_steps.size() - 1); i >= 0; i--)
-        chess->detach(possible_steps[i]);
 }
