@@ -76,6 +76,7 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
         decider = 1;  // For some reason ternary operator didn't work so
     else              // I had to set 'decider' value the old-fashioned way
         decider = -1;
+
     if (decider == 1)
         take_decider = true;
     else
@@ -189,9 +190,9 @@ int Pawn::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
 
 bool Pawn::can_take_king (Chessboard& chess, Cell& king_position)
 {
-    bool first_step_reserved = first_step;            // Костыль
-    bool double_step_reserved = double_step;          // Костыль
-    int steps_till_reset_reserved = steps_till_reset; // Костыль
+    bool first_step_reserved = first_step;
+    bool double_step_reserved = double_step;
+    int steps_till_reset_reserved = steps_till_reset;
 
     bool returning_value = correct_step(*(const_cast<Cell*>(get_cell())), king_position, chess, false);
 
@@ -269,7 +270,6 @@ VisualSteps* Pawn::show_possible_steps(Coordinate position, Chessboard& chess)  
                     tempf = new Frame{chess[x + 1][y + decider].center(), chess};
                 AttachManager<Frame> am_tempf{tempf, chess};
                 steps_representation->possible_takes.push_back(am_tempf);
-                // delete tempf;
             }
             if (a == -1)
             {
@@ -397,7 +397,6 @@ void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, Vi
                     Frame* tempf = new Frame{chess[i][position.y].center(), chess};
                     AttachManager<Frame> am_tempf{tempf, chess};
                     steps_representation->possible_takes.push_back(am_tempf);
-                    // delete tempf;
                     break;
                 }
                 else
@@ -407,7 +406,6 @@ void Rook::horisontal_possible_steps(Coordinate& position, Chessboard& chess, Vi
                     am_tempc.set_color(chess_yellow);
                     am_tempc.set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(am_tempc);
-                    // delete tempc;
                 }
             }
             else if(a == -1)
@@ -554,7 +552,6 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
                     Frame* tempf = new Frame{chess[pos.x][pos.y].center(), chess};
                     AttachManager<Frame> am_tempf{tempf, chess};
                     steps_representation->possible_takes.push_back(am_tempf);
-                    // delete tempf;
                 }
                 else
                 {
@@ -563,7 +560,6 @@ VisualSteps* Knight::show_possible_steps(Coordinate position, Chessboard& chess)
                     am_tempc.set_color(chess_yellow);
                     am_tempc.set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(am_tempc);
-                    // delete tempc;
                 }
             }
             else if (a == -1)
@@ -680,7 +676,6 @@ void Bishop::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2
                 Frame* tempf = new Frame{chess[x][y].center(), chess};
                 AttachManager<Frame> am_tempf{tempf, chess};
                 steps_representation->possible_takes.push_back(am_tempf);
-                // delete tempf;
                 break;
             }
             else
@@ -833,7 +828,6 @@ void Queen::horisontal_possible_steps(Coordinate& position, Chessboard& chess, V
                     Frame* tempf = new Frame{chess[i][position.y].center(), chess};
                     AttachManager<Frame> am_tempf{tempf, chess};
                     steps_representation->possible_takes.push_back(am_tempf);
-                    // delete tempf;
                     break;
                 }
                 else
@@ -843,7 +837,6 @@ void Queen::horisontal_possible_steps(Coordinate& position, Chessboard& chess, V
                     am_tempc.set_color(chess_yellow);
                     am_tempc.set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(am_tempc);
-                    // delete tempc;
                 }
             }
             else if(a == -1)
@@ -871,7 +864,6 @@ void Queen::vertical_possible_steps(Coordinate& position, Chessboard& chess, Vis
                     Frame* tempf = new Frame{chess[position.x][i].center(), chess};
                     AttachManager<Frame> am_tempf{tempf, chess};
                     steps_representation->possible_takes.push_back(am_tempf);
-                    // delete tempf;
                     break;
                 }
                 else
@@ -881,7 +873,6 @@ void Queen::vertical_possible_steps(Coordinate& position, Chessboard& chess, Vis
                     am_tempc.set_color(chess_yellow);
                     am_tempc.set_fill_color(chess_yellow);
                     steps_representation->possible_steps.push_back(am_tempc);
-                    // delete tempc;
                 }
             }
             else if (a == -1)
@@ -923,7 +914,6 @@ void Queen::show_possible_steps_HF(int x, int y, int x0, int y0, int d1, int d2,
                 Frame* tempf = new Frame{chess[x][y].center(), chess};
                 AttachManager<Frame> am_tempf{tempf, chess};
                 steps_representation->possible_takes.push_back(am_tempf);
-                // delete tempf;
                 break;
             }
             else
@@ -969,7 +959,6 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                    is_white() == chess[x1+3*d][y1].get_figure().is_white() &&
                    chess[x1+3*d][y1].get_figure().is_rook() && dynamic_cast<Rook*>(&(chess[x1+3*d][y1].get_figure()))->castling())
                 {
-                    // chess[x1+d][y1].attach_figure(chess[x1+3*d][y1].detach_figure());
                     if(d == -1)
                         dlsc = true;
                     else if(d == 1)
@@ -981,7 +970,6 @@ int King::correct_step(Cell& c1, Cell& c2, Chessboard& chess, bool ensure_king_i
                         is_white() == chess[x1+4*d][y1].get_figure().is_white() &&
                         !chess[x1+3*d][y1].has_figure() && dynamic_cast<Rook*>(&(chess[x1+4*d][y1].get_figure()))->castling())
                 {
-                    // chess[x1+d][y1].attach_figure(chess[x1+3*d][y1].detach_figure());
                     if(d == -1)
                         dllc = true;
                     else if(d == 1)

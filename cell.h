@@ -7,7 +7,7 @@
 
 constexpr int chess_green = 116;
 constexpr int chess_white = 215;
-constexpr int chess_light_yellow = 134; // 134
+constexpr int chess_light_yellow = 134;
 
 constexpr int DFTBOF = 30; //distance_from_the_beginning_of_coordinates
 
@@ -55,8 +55,7 @@ struct Cell : Graph_lib::Button
 
     bool has_figure () const { return figure != nullptr; }
 
-    // removed const and i don't know how it will turn out
-    /*const*/ Figure& get_figure ();  // обязательно нужна проверка не нулевой ли указатель checker
+    Figure& get_figure ();  // обязательно нужна проверка не нулевой ли указатель checker
 
     Coordinate location() const; //gets pair {char x , int y} - coordinate of a cell
     private:

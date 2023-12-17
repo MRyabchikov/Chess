@@ -106,6 +106,7 @@ struct Chessboard : MyWindow
 
         void clicked (Cell& c);
 
+        //decides if you can do a move on a clicked cell
         bool decide();
 
         void step_swap() {step_chooser = (step_chooser == step_color::white) ? step_color::black : step_color::white;}

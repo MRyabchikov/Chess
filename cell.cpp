@@ -1,8 +1,6 @@
 #include "cell.h"
-//
 #include "figure.h"
 #include <iostream>
-// #include "pawn.h"
 
 
 using namespace Graph_lib;
@@ -40,8 +38,7 @@ void Cell::attach_figure(Figure& ch)
 
 }
 
-//removed const and i don't know how it will turn out  
-/*const*/ Figure& Cell::get_figure()  // обязательно нужна проверка не нулевой ли указатель checker                     
+Figure& Cell::get_figure()  // обязательно нужна проверка не нулевой ли указатель checker                     
 { 
     return *figure;
 }

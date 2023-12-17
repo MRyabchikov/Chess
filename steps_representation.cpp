@@ -90,9 +90,6 @@ Frame::Frame(Point center, Simple_window& chess_) :
     horisontal_rectangles.push_back(am_h_r3);
     horisontal_rectangles.push_back(am_h_r4);
 
-    //There are probably ways to avoid Copy+Paste but there's 
-    //something with Graph_lib that doesn't allow it to be easy
-
     Rectangle* v_r1 = new Rectangle{{center.x - c_size/2, center.y - c_size/2}, rc_length, rc_width};
     Rectangle* v_r2 = new Rectangle{{center.x + c_size/2 - rc_length, center.y - c_size/2}, rc_length, rc_width};
     Rectangle* v_r3 = new Rectangle{{center.x - c_size/2, center.y + c_size/2 - rc_width}, rc_length, rc_width};

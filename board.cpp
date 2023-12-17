@@ -16,7 +16,7 @@ MyWindow::MyWindow(Point xy, int w, int h, const std::string& title)
 }
 
 void MyWindow::cb_quit(Address, Address widget)
-{   // void*
+{
     auto& btn = Graph_lib::reference_to<Graph_lib::Button>(widget);
     dynamic_cast<MyWindow&>(btn.window()).quit();
 }
@@ -82,7 +82,7 @@ Chessboard::Chessboard(Point xy) : MyWindow{xy, width, height, "Chessboard"}, x_
 
 void Chessboard::standard_fill()
 {
-    // белые пешки
+    // white pawns
     for(int i = 0; i < 8; i++)
     {
         Pawn* temp_pawn = new Pawn(*this, Figure::Type::white);
@@ -90,7 +90,7 @@ void Chessboard::standard_fill()
         at(char(a_ascii+i),2).attach_figure(pawns[i]);
     }
 
-    // чёрные пешки
+    // black pawns
     for(int i = 8; i < 16; i++)
     {
         Pawn* temp_pawn = new Pawn(*this, Figure::Type::black);
@@ -99,7 +99,7 @@ void Chessboard::standard_fill()
     }
 
 
-    // белые кони
+    // white knights
     Knight* wn0 = new Knight{*this, Figure::Type::white};
     Knight* wn1 = new Knight{*this, Figure::Type::white};
 
@@ -109,7 +109,7 @@ void Chessboard::standard_fill()
     at('b',1).attach_figure(knights[0]);
     at('g',1).attach_figure(knights[1]);
 
-    // черыне кони
+    // black knights
     Knight* bn0 = new Knight{*this, Figure::Type::black};
     Knight* bn1 = new Knight{*this, Figure::Type::black};
 
@@ -119,7 +119,7 @@ void Chessboard::standard_fill()
     at('b',8).attach_figure(knights[2]);
     at('g',8).attach_figure(knights[3]);
 
-    // белые слоны
+    // white bishops
     Bishop* wb0 = new Bishop{*this, Figure::Type::white};
     Bishop* wb1 = new Bishop{*this, Figure::Type::white};
 
@@ -129,7 +129,7 @@ void Chessboard::standard_fill()
     at('c',1).attach_figure(bishops[0]);
     at('f',1).attach_figure(bishops[1]);
 
-    // черные слоны
+    // black bishops
     Bishop* bb0 = new Bishop{*this, Figure::Type::black};
     Bishop* bb1 = new Bishop{*this, Figure::Type::black};
 
@@ -139,7 +139,7 @@ void Chessboard::standard_fill()
     at('c',8).attach_figure(bishops[2]);
     at('f',8).attach_figure(bishops[3]);
 
-    // белые ладьи
+    // white rooks
     Rook* wr0 = new Rook{*this, Figure::Type::white};
     Rook* wr1 = new Rook{*this, Figure::Type::white};
 
@@ -149,7 +149,7 @@ void Chessboard::standard_fill()
     at('a',1).attach_figure(rooks[0]);
     at('h',1).attach_figure(rooks[1]);
 
-    // черные ладьи
+    // black rooks
     Rook* br0 = new Rook{*this, Figure::Type::black};
     Rook* br1 = new Rook{*this, Figure::Type::black};
 
@@ -159,28 +159,28 @@ void Chessboard::standard_fill()
     at('a',8).attach_figure(rooks[2]);
     at('h',8).attach_figure(rooks[3]);
 
-    // Белый король
+    // white king
     King* wk = new King{*this, Figure::Type::white};
 
     kings.push_back(wk);
 
     at('e',1).attach_figure(kings[0]);
 
-    // Черный король
+    // black king
     King* bk = new King{*this, Figure::Type::black};
 
     kings.push_back(bk);
 
     at('e',8).attach_figure(kings[1]);
 
-    // Белый ферзь
+    // white queen
     Queen* wq = new Queen{*this, Figure::Type::white};
 
     queens.push_back(wq);
 
     at('d',1).attach_figure(queens[0]);
 
-    // Черный ферзь
+    // black queen
     Queen* bq = new Queen{*this, Figure::Type::black};
 
     queens.push_back(bq);
@@ -189,17 +189,12 @@ void Chessboard::standard_fill()
 }
 
 void Chessboard::clicked(Cell& c)
-{   // для шашек. Для всего остального удалить
-    // if (!c.is_black()) return; для контроля, кто должен ходить
-    //  в c также лежит информация о том, стоит ли фигура на это клетке. (предположительно)
-    //  если стоит, то has_checker() == true;
-    // std::cout << "*\n";
-    // std::cout << "1\n";
+{
+    // if we haven't selected a figure in the previous step
     if (!selected)
     {
-        // all_possible_steps = nullptr;
         selected = &c;
-        c.activate();  // подсвечивает
+        c.activate();  // highlights the cell
         if (decide() == false)
         {
             c.deactivate();
@@ -208,18 +203,14 @@ void Chessboard::clicked(Cell& c)
         }
         // Create visual representation of moves for current figure
         all_possible_steps = c.get_figure().show_possible_steps(c.location(), *this);
-        // std::cout << "2\n";
     }
     else
     {
-        // std::cout << "3\n";
         if (selected->has_figure())
         {
             int a = selected->get_figure().correct_step(*selected, c, *this);
             if (a > 0)
             {
-                // if()
-                //  move_figure
                 Cell& c1 = *selected;
                 int x = c.location().x, y = c.location().y;
 
@@ -231,12 +222,14 @@ void Chessboard::clicked(Cell& c)
                 if (c.has_figure())
                 {
                     // taking the figure from the opponent
-                    detach(c.detach_figure());            // убираем фигуру врага
-                    c.attach_figure(c1.detach_figure());  // переносим свою
+                    detach(c.detach_figure());
+                    // move the figure to the taken place
+                    c.attach_figure(c1.detach_figure());
                 }
                 else if (1 <= y + b && y + b <= 8 && (*this)[x][y + b].has_figure() && (a == 2 || a == 3))
                 {
-                    detach((*this)[x][y + b].detach_figure());  // *this = chess
+                    // *this <=> chess
+                    detach((*this)[x][y + b].detach_figure());
                     (*this)[x][y].attach_figure(c1.detach_figure());
                 }
                 else if(c1.get_figure().is_king())
@@ -315,6 +308,7 @@ void Chessboard::clicked(Cell& c)
     Fl::redraw();
 }
 
+//decides if you can do a move on a clicked cell
 bool Chessboard::decide()
 {
     if (!selected->has_figure())

@@ -38,7 +38,7 @@ struct RedCross : Rectangle
     void draw_lines () const override;
 
     private:
-        static constexpr int dist = 9;
+        static constexpr int dist = 13;
 
         std::vector<AttachManager<Closed_polyline>> rectangles;
 };

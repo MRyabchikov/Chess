@@ -8,7 +8,7 @@
 
 constexpr int a_ascii = 97;  // ascii code of letter 'a'
 
-constexpr int chess_yellow = 133;  // 16
+constexpr int chess_yellow = 133;
 
 struct Cell;
 struct Chessboard;
@@ -16,7 +16,7 @@ struct Coordinate;
 struct VisualSteps;
 
 struct Figure : Graph_lib::Image
-{  // Graph_lib::Image
+{
 
     enum Type
     {
@@ -90,8 +90,6 @@ struct Pawn : Figure
     bool double_step0 () override { return double_step; }
 
     void reset_double_step () override;
-
-    // private:
 
     bool double_step;
     int steps_till_reset;
