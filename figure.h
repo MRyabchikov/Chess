@@ -64,6 +64,8 @@ struct Figure : Graph_lib::Image
 
     bool is_black () const { return color == black; }
 
+    bool need_transformation ();
+
     void detach () { cell = nullptr; }
 
     private:

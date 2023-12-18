@@ -31,6 +31,9 @@ void Figure::attach(const Cell& c)
     cell = &c;
 }
 
+bool Figure::need_transformation() {return is_pawn() && (get_cell()->location().y == 8 && is_white() || 
+                                        get_cell()->location().y == 1 &&  is_black());}
+
 bool Figure::change_pos_decider(Cell& c)
 {
     if (c.has_figure())

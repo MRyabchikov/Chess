@@ -263,6 +263,12 @@ void Chessboard::clicked(Cell& c)
                 {
                     c.attach_figure(c1.detach_figure());
                 }
+                if(c.get_figure().is_pawn() && dynamic_cast<Pawn&>(c.get_figure()).need_transformation()){
+                    Queen *temp_queen = new Queen(*this, c.get_figure().is_white()?Figure::Type::white : Figure::Type::black);
+                    detach(c.detach_figure());
+                    queens.push_back(temp_queen);
+                    at(char(c.location().x), c.location().y).attach_figure(queens[queens.size()-1]);   
+                }
 
                 step_swap();
                 reset_double_steps();
